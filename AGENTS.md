@@ -10,7 +10,7 @@ The EPCV system is an **Explore → Plan → Code → Verify** workflow that enf
 
 1. **Explore before acting** — Never change what you don't understand
 2. **Plan before coding** — Design decisions belong in the plan
-3. **Follow existing patterns** — Consistency over theoretical perfection  
+3. **Follow existing patterns** — Consistency over theoretical perfection
 4. **Verify everything** — Never deliver unverified work
 5. **Human in the loop** — Two mandatory approval gates (post-Explore, post-Plan)
 6. **Fail fast** — Surface blockers immediately
@@ -91,7 +91,7 @@ When working on actual codebases, agents should:
 - Match the existing brace style (same line vs new line)
 - Match the existing semicolon usage
 - Match the existing line length conventions
-- Match the existing comment style (// vs /**/ vs #)
+- Match the existing comment style (// vs /\*\*/ vs #)
 
 ### Error Handling
 
@@ -133,7 +133,7 @@ Explore → [human approval] → Plan → [human approval] →
 - Output: Exploration report with files, patterns, dependencies, risks
 - Tools: read, glob, grep (read-only)
 
-#### Phase 2: Plan  
+#### Phase 2: Plan
 
 - Purpose: Break work into atomic tasks with clear acceptance criteria
 - Output: Atomic task specifications, task briefs, do-not-touch list
@@ -222,7 +222,7 @@ Each atomic task specification must include:
 - Abbreviated workflow, concise approvals
 - 1 phase, 1-2 atomic tasks
 
-**Moderate**: Multiple files, some dependencies, clear requirements  
+**Moderate**: Multiple files, some dependencies, clear requirements
 
 - Standard workflow, full approvals
 - 1-2 phases, multiple atomic tasks

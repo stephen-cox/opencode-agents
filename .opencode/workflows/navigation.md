@@ -9,7 +9,7 @@
 Runs the full iterative workflow: Explore → [human approval] → Plan → [human approval] → Code → Verify → Commit (per task, per phase).
 
 | Complexity     | Approach                                                    | Duration        |
-|----------------|-------------------------------------------------------------|-----------------|
+| -------------- | ----------------------------------------------------------- | --------------- |
 | -------------- | ----------------------------------------------------------- | --------------- |
 | Simple         | Abbreviated: 1 phase, 1-2 tasks, concise approvals          | 5-15 min        |
 | Simple         | Abbreviated: 1 phase, 1-2 tasks, concise approvals          | 5-15 min        |
@@ -49,7 +49,7 @@ Runs a quick Explore for context, then full 4-layer verification (automated, beh
 ## Workflow Selection Guide
 
 | I want to...                      | Use           |
-|-----------------------------------|---------------|
+| --------------------------------- | ------------- |
 | --------------------------------- | ------------- |
 | ------------------------------    | -----------   |
 | Build a feature                   | `/epcv`       |

@@ -104,7 +104,7 @@ Verification effort scales with the task's risk level, but is never optional.
 ## Complexity Levels
 
 | Level    | Characteristics                                           | EPCV Approach                                        |
-|----------|-----------------------------------------------------------|------------------------------------------------------|
+| -------- | --------------------------------------------------------- | ---------------------------------------------------- |
 | -------  | ----------------                                          | ---------------                                      |
 | Simple   | Single file, isolated, clear requirements                 | Abbreviated: 1 phase, 1-2 tasks, concise approvals   |
 | Moderate | Multiple files, some dependencies, clear requirements     | Standard: 1-2 phases, multiple tasks, full approvals |

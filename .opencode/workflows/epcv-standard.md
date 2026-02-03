@@ -37,7 +37,7 @@ approval gates ensure the developer remains in control of requirements and appro
 - Patterns documented
 - Dependencies mapped
 - Risks identified
-**Gate**: Exploration report is complete
+  **Gate**: Exploration report is complete
 
 ### Stage 3: Human Approval — Solution Direction
 
@@ -61,7 +61,7 @@ approval gates ensure the developer remains in control of requirements and appro
   automated tests, manual test steps, rollback note, risk level
 - Task briefs produced for the Coder
 - Do-not-touch list and guardrails defined
-**Gate**: Atomic tasks with acceptance criteria produced
+  **Gate**: Atomic tasks with acceptance criteria produced
 
 ### Stage 5: Human Approval — Implementation Plan
 
@@ -84,7 +84,7 @@ approval gates ensure the developer remains in control of requirements and appro
 - Do-not-touch list respected
 - Patterns followed
 - Deviations documented
-**Gate**: Task implemented, guardrails respected
+  **Gate**: Task implemented, guardrails respected
 
 ### Stage 7: Verify (per task)
 
@@ -101,7 +101,7 @@ approval gates ensure the developer remains in control of requirements and appro
 - Verification depth matches task risk level
 - Acceptance criteria met
 - Definition of done complete
-**Gate**: Status is PASS or PASS_WITH_WARNINGS
+  **Gate**: Status is PASS or PASS_WITH_WARNINGS
 
 ### Stage 8: Commit (per task)
 
