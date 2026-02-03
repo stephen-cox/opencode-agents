@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "markdownlint-cli2": "^0.20.0",
+    "prettier": "3.8.1"
+  },
+  "scripts": {
+    "lint:md": "markdownlint-cli2 \"**/*.md\"  \"#node_modules\"  \"#.opencode/node_modules\"",
+    "lint:md:fix": "markdownlint-cli2 \"**/*.md\"  \"#node_modules\" \"#.opencode/node_modules\" --fix",
+    "test:md": "markdownlint-cli2 \"**/*.md\"  \"#node_modules\" \"#.opencode/node_modules\"",
+    "prepare": "husky && husky install"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
+  }
+}
