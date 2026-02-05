@@ -14,6 +14,9 @@
     "prettier": "prettier --write ./"
   },
   "lint-staged": {
-    "*.{md}": "prettier --write ./"
+    "*.md": [
+      "markdownlint-cli2",
+      "prettier --write"
+    ]
   }
 }
