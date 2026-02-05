@@ -48,14 +48,13 @@ Runs a quick Explore for context, then full 4-layer verification (automated, beh
 
 ## Workflow Selection Guide
 
-| I want to...                      | Use           |
-| --------------------------------- | ------------- |
-| --------------------------------- | ------------- |
-| ------------------------------    | -----------   |
-| Build a feature                   | `/epcv`       |
-| Fix a bug                         | `/epcv`       |
-| Refactor code                     | `/epcv`       |
-| Understand code                   | `/explore`    |
-| Review code quality               | `/verify`     |
-| Plan before committing            | `/plan`       |
-| Get a second opinion on approach  | `/plan`       |
+| I want to...                     | Use                  |
+| -------------------------------- | -------------------- |
+| Build a feature                  | `/epcv`              |
+| Fix a bug                        | `/epcv`              |
+| Refactor code                    | `/epcv`              |
+| Understand code                  | `/explore`           |
+| Review code quality              | `/verify`            |
+| Plan before committing           | `/plan`              |
+| Get a second opinion on approach | `/plan`              |
+| Execute an approved plan         | `/plan` then `/code` |

@@ -1,4 +1,4 @@
-# EPCV System - Explore → Plan → Code → Verify
+# Open Code agent for Explore → Plan → Code → Verify workflow
 
 A disciplined, iterative workflow system for AI-assisted software development that ensures quality while maintaining developer control.
 
@@ -10,6 +10,37 @@ The EPCV (Explore → Plan → Code → Verify) system enforces a structured app
 2. **Plan** - Design solutions and break work into atomic tasks
 3. **Code** - Implement each task precisely
 4. **Verify** - Validate through four-layered checks
+
+```mermaid
+flowchart TB
+    A(["Bug, feature or project"]) --> B["**Explore**"]
+    B --> C["Accepted solution"]
+    C --> D["**Plan**"]
+    D --> E1["Phase breakdown
+    (for larger pieces of work)"]
+    E1 --> E2["Task specification
+    (for current phase)"]
+    E2 --> F["**Code**"]
+    F --> G["Code changes"]
+    G --> H["**Verify**"]
+    H --> I{"Acceptance
+    criteria met?"}
+    I -- No --> F
+    I -- Yes --> J["Commit changes"]
+    J --> K{"Are there
+    more tasks?"}
+    K -- No --> L{"Are there
+    more phases?"}
+    K -- Yes --> F
+    L -- No --> M(["Complete"])
+    L -- Yes --> D
+
+    C@{ shape: lean-r}
+    E1@{ shape: lean-r}
+    E2@{ shape: lean-r}
+    G@{ shape: lean-r}
+    J@{ shape: trap-t}
+```
 
 ## Key Features
 

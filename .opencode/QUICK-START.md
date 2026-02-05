@@ -46,6 +46,20 @@ Get a structured report of the codebase without making any changes. No approval 
 
 Get an exploration report and implementation plan (phases, atomic tasks, do-not-touch list) without writing code.
 
+### Plan Then Code (Two-Step Workflow)
+
+```text
+/plan Add a caching layer to the API
+```
+
+Review the exploration and plan. Once you approve:
+
+```text
+/code
+```
+
+Execute the Code → Verify → Commit loop for the approved plan. This two-step workflow lets you review the plan thoroughly before any code is written, then proceed to implementation without re-running exploration.
+
 ### Just Verify
 
 ```text
@@ -89,7 +103,8 @@ Get a 4-layer verification (automated, behavioural, operational, security) and q
 1. **Be specific** in your requests — the more detail, the better the exploration
 2. **Use `/explore` first** if you're unsure about scope
 3. **Use `/plan` first** for complex tasks to review the approach before committing to implementation
-4. **Review the do-not-touch list** at the plan approval gate — it prevents unrelated changes
-5. **Check acceptance criteria** at the plan approval gate — they define exactly what "done" means
-6. **Trust the process** — exploration prevents most implementation errors
-7. **Review warnings** — PASS_WITH_WARNINGS means minor issues were noted but nothing critical
+4. **Use `/code` after `/plan`** to execute the approved plan without re-running exploration
+5. **Review the do-not-touch list** at the plan approval gate — it prevents unrelated changes
+6. **Check acceptance criteria** at the plan approval gate — they define exactly what "done" means
+7. **Trust the process** — exploration prevents most implementation errors
+8. **Review warnings** — PASS_WITH_WARNINGS means minor issues were noted but nothing critical

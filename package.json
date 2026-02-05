@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "backlog.md": "^1.35.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "markdownlint-cli2": "^0.20.0",
@@ -9,9 +10,10 @@
     "lint:md": "markdownlint-cli2 \"**/*.md\"  \"#node_modules\"  \"#.opencode/node_modules\"",
     "lint:md:fix": "markdownlint-cli2 \"**/*.md\"  \"#node_modules\" \"#.opencode/node_modules\" --fix",
     "test:md": "markdownlint-cli2 \"**/*.md\"  \"#node_modules\" \"#.opencode/node_modules\"",
-    "prepare": "husky && husky install"
+    "prepare": "husky && husky install",
+    "prettier": "prettier --write ./"
   },
   "lint-staged": {
-    "*.{md}": "prettier --write"
+    "*.{md}": "prettier --write ./"
   }
 }

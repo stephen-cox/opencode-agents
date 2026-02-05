@@ -16,105 +16,35 @@ The EPCV system is an **Explore → Plan → Code → Verify** workflow that enf
 6. **Fail fast** — Surface blockers immediately
 7. **Transparency** — Document all decisions, deviations, and findings
 
+## Backlog workflow instructions
+
+This project uses Backlog.md MCP for all task and project management activities.
+
+### Critical guidance
+
+- If your client supports MCP resources, read `backlog://workflow/overview` to understand when and how to use Backlog for this project.
+- If your client only supports tools or the above request fails, call `backlog.get_workflow_overview()` tool to load the tool-oriented overview (it lists the matching guide tools).
+
+- **First time working here?** Read the overview resource IMMEDIATELY to learn the workflow
+- **Already familiar?** You should have the overview cached ("## Backlog.md Overview (MCP)")
+- **When to read it**: BEFORE creating tasks, or when you're unsure whether to track work
+
+These guides cover:
+
+- Decision framework for when to create tasks
+- Search-first workflow to avoid duplicates
+- Links to detailed guides for task creation, execution, and finalization
+- MCP tools reference
+
+You MUST read the overview resource to understand the complete workflow. The information is NOT summarized here.
+
 ## Build/Lint/Test Commands
 
-### For This Repository (EPCV Configuration)
-
-**Markdown Linting:**
+### Markdown Linting
 
 - `npm run lint:md` - Check markdown files for style issues
 - `npm run lint:md:fix` - Automatically fix markdown style issues
 - `npm run test:md` - Test markdown formatting
-
-### For Target Codebases
-
-When working on actual codebases, agents should:
-
-**Build Commands:**
-
-- `npm run build` (Node.js/TypeScript)
-- `cargo build` (Rust)
-- `python -m build` (Python)
-- `make build` (Makefile projects)
-
-**Lint Commands:**
-
-- `npm run lint` (ESLint)
-- `cargo clippy` (Rust)
-- `ruff check` (Python)
-- `biome lint` (Biome)
-- `prettier --check` (Prettier)
-
-**Test Commands:**
-
-- `npm test` (Node.js)
-- `cargo test` (Rust)
-- `pytest` (Python)
-- `npm run test:single <test-file>` (Single test file)
-- `pytest <test-file>::<test-function>` (Single Python test)
-- `cargo test <test-name>` (Single Rust test)
-
-**Type Check Commands:**
-
-- `npm run typecheck` (TypeScript)
-- `tsc --noEmit` (TypeScript compiler)
-- `mypy .` (Python type checking)
-
-## Code Style Guidelines
-
-### General Rules
-
-- **Read before write**: Always read files before modifying them
-- **Match existing patterns**: Follow the codebase's established conventions
-- **Surgical precision**: Make minimal, focused changes
-- **No scope creep**: Stick to the task specification
-- **Document deviations**: If you must deviate, explain why
-
-### Naming Conventions
-
-- Follow the existing codebase's naming style (camelCase, snake_case, PascalCase)
-- Use descriptive, intent-revealing names
-- Avoid abbreviations unless they're used consistently in the codebase
-- Function names should indicate action (e.g., `calculateTotal`, `fetchUserData`)
-- Variable names should indicate content (e.g., `userProfile`, `errorMessage`)
-
-### Import Ordering
-
-- Follow the existing import ordering pattern
-- Group imports by type (built-in, third-party, local)
-- Sort imports alphabetically within groups
-- Use absolute imports unless the codebase uses relative imports
-
-### Formatting
-
-- Match the existing indentation (tabs vs spaces)
-- Match the existing brace style (same line vs new line)
-- Match the existing semicolon usage
-- Match the existing line length conventions
-- Match the existing comment style (// vs /\*\*/ vs #)
-
-### Error Handling
-
-- Follow the existing error handling patterns
-- Never swallow errors silently
-- Use appropriate error types for the language
-- Include meaningful error messages
-- Handle edge cases explicitly
-
-### Type Usage
-
-- Use the existing type system (TypeScript, Python type hints, etc.)
-- Add type annotations for new functions and variables
-- Use appropriate type aliases and interfaces
-- Avoid `any` or `unknown` types when specific types are available
-
-### Documentation
-
-- Follow the existing documentation style
-- Add comments for complex logic
-- Update docstrings when modifying functions
-- Document public APIs and interfaces
-- Use consistent documentation format (JSDoc, Google style, etc.)
 
 ## EPCV Workflow Structure
 
