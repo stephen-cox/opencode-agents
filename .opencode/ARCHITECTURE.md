@@ -109,14 +109,12 @@ The Orchestrator never performs phase work directly. It:
 
 Each subagent receives only the context it needs:
 
-| Agent       | Receives                                                                        | Does NOT Receive                             |
-| ----------- | ------------------------------------------------------------------------------- | -------------------------------------------- |
-| ----------- | ------------------------------------------------------------------------------- | -------------------------------------------- |
-| ----------  | -----------------------------------------------------------------------------   | --------------------------------------       |
-| Explorer    | Request, complexity, known affected areas                                       | Plans, code changes, verification            |
-| Planner     | Request, exploration report, approved direction, complexity                     | Code changes, verification                   |
-| Coder       | Task spec, task brief, do-not-touch list, patterns                              | Raw exploration, other tasks, verification   |
-| Verifier    | Task spec (acceptance criteria, DoD, risk), changes, manual test steps          | Exploration details, task briefs             |
+| Agent    | Receives                                                               | Does NOT Receive                           |
+| -------- | ---------------------------------------------------------------------- | ------------------------------------------ |
+| Explorer | Request, complexity, known affected areas                              | Plans, code changes, verification          |
+| Planner  | Request, exploration report, approved direction, complexity            | Code changes, verification                 |
+| Coder    | Task spec, task brief, do-not-touch list, patterns                     | Raw exploration, other tasks, verification |
+| Verifier | Task spec (acceptance criteria, DoD, risk), changes, manual test steps | Exploration details, task briefs           |
 
 ### Quality Gates (11-Stage Enforcement)
 
@@ -165,14 +163,12 @@ The guide defines atomic tasks as the fundamental unit of work. Without them:
 
 ### Why 4 Phases?
 
-| Phase      | Prevents                                            |
-| ---------- | --------------------------------------------------- |
-| ---------- | --------------------------------------------------- |
-| ---------  | -------------------------------------------------   |
-| Explore    | Blind changes that break existing patterns          |
-| Plan       | Rework from poor design decisions                   |
-| Code       | Inconsistency from ad-hoc implementation            |
-| Verify     | Bugs and regressions reaching the user              |
+| Phase   | Prevents                                   |
+| ------- | ------------------------------------------ |
+| Explore | Blind changes that break existing patterns |
+| Plan    | Rework from poor design decisions          |
+| Code    | Inconsistency from ad-hoc implementation   |
+| Verify  | Bugs and regressions reaching the user     |
 
 ### Why Separate Agents?
 
@@ -200,12 +196,10 @@ Classification ensures appropriate effort for each task.
 
 ## Performance Characteristics
 
-| Metric                   | Expected                                                        |
-| ------------------------ | --------------------------------------------------------------- |
-| ------------------------ | --------------------------------------------------------------- |
-| -----------------------  | -------------------------------------------------------------   |
-| Context efficiency       | High — filtered passing per subagent                            |
-| First-pass success       | ~80% — exploration prevents blind errors                        |
-| Retry success rate       | ~95% — specific fix instructions from Verifier                  |
-| Human gate overhead      | Minimal — concise summaries for simple tasks                    |
-| Iterative scaling        | Linear — task/phase loops handle any size                       |
+| Metric              | Expected                                       |
+| ------------------- | ---------------------------------------------- |
+| Context efficiency  | High — filtered passing per subagent           |
+| First-pass success  | ~80% — exploration prevents blind errors       |
+| Retry success rate  | ~95% — specific fix instructions from Verifier |
+| Human gate overhead | Minimal — concise summaries for simple tasks   |
+| Iterative scaling   | Linear — task/phase loops handle any size      |

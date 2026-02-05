@@ -99,14 +99,12 @@
 
 ## Minimum Scores for Delivery
 
-| Dimension              | Minimum                    | Target                   |
-| ---------------------- | -------------------------- | ------------------------ |
-| ---------------------- | -------------------------- | ------------------------ |
-| ---------------------  | ------------------------   | ----------------------   |
-| Correctness            | Must pass                  | Must pass                |
-| Pattern Adherence      | 8/10                       | 9/10                     |
-| Acceptance Criteria    | 100% pass                  | 100% pass                |
-| Definition of Done     | 100% complete              | 100% complete            |
-| Test Coverage          | Critical paths covered     | All paths covered        |
-| Build Status           | Must pass                  | Must pass                |
-| Security Checks        | No critical issues         | No issues                |
+| Dimension           | Minimum                | Target            |
+| ------------------- | ---------------------- | ----------------- |
+| Correctness         | Must pass              | Must pass         |
+| Pattern Adherence   | 8/10                   | 9/10              |
+| Acceptance Criteria | 100% pass              | 100% pass         |
+| Definition of Done  | 100% complete          | 100% complete     |
+| Test Coverage       | Critical paths covered | All paths covered |
+| Build Status        | Must pass              | Must pass         |
+| Security Checks     | No critical issues     | No issues         |

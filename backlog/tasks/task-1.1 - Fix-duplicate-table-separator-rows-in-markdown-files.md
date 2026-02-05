@@ -1,9 +1,10 @@
 ---
 id: TASK-1.1
 title: Fix duplicate table separator rows in markdown files
-status: To Do
+status: Done
 assignee: []
 created_date: "2026-02-05 21:38"
+updated_date: "2026-02-05 21:57"
 labels:
   - epcv
   - documentation
@@ -55,7 +56,33 @@ Each table should have exactly one separator row after the header row.
 
 <!-- AC:BEGIN -->
 
-- [ ] #1 All markdown tables have exactly one separator row after the header
-- [ ] #2 No empty rows render when viewing tables in markdown viewers
-- [ ] #3 Markdown linting passes (`npm run lint:md`)
+- [x] #1 All markdown tables have exactly one separator row after the header
+- [x] #2 No empty rows render when viewing tables in markdown viewers
+- [x] #3 Markdown linting passes (`npm run lint:md`)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+
+## Implementation Summary
+
+### Files Modified
+
+- `.opencode/navigation.md` - Fixed 3 tables (Agents, Workflows, Context)
+- `.opencode/workflows/navigation.md` - Fixed 1 table (Complexity)
+- `.opencode/context/navigation.md` - Fixed 4 tables (Domain, Processes, Standards, Templates)
+- `.opencode/ARCHITECTURE.md` - Fixed 3 tables (Context Flow, Why 4 Phases, Performance)
+- `.opencode/context/domain/epcv-methodology.md` - Fixed 1 table (Complexity Levels)
+- `.opencode/context/processes/epcv-workflow-process.md` - Fixed 2 tables (Quality Gates, Error Handling)
+- `.opencode/context/standards/quality-criteria.md` - Fixed 1 table (Minimum Scores)
+- `.opencode/context/standards/validation-rules.md` - Fixed 1 table (Retry Rules)
+- `.opencode/context/standards/error-handling.md` - Fixed 3 tables (Exploration, Coding, Verification Errors)
+
+### Total: 19 tables fixed across 10 files
+
+### Verification
+
+- `npm run lint:md` passes with 0 errors
+- All tables now have exactly one separator row after the header
+<!-- SECTION:NOTES:END -->

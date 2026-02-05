@@ -24,38 +24,33 @@ requirements and approach.
 
 ### Agents
 
-| Agent                | File                            | Purpose                                                                                |
-| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------- |
-| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------- |
-| -------------------  | -------------------------       | -------------------------------------------------------------------------------        |
-| EPCV Orchestrator    | `agent/epcv-orchestrator.md`    | Main coordinator: classifies, routes, enforces human gates, manages task/phase loops   |
-| Explorer             | `agent/subagents/explorer.md`   | Codebase investigation (Phase 1)                                                       |
-| Planner              | `agent/subagents/planner.md`    | Solution design, atomic task specs, task briefs (Phase 2)                              |
-| Coder                | `agent/subagents/coder.md`      | Implementation per atomic task (Phase 3)                                               |
-| Verifier             | `agent/subagents/verifier.md`   | 4-layer verification per atomic task (Phase 4)                                         |
+| Agent             | File                         | Purpose                                                                              |
+| ----------------- | ---------------------------- | ------------------------------------------------------------------------------------ |
+| EPCV Orchestrator | `agent/epcv-orchestrator.md` | Main coordinator: classifies, routes, enforces human gates, manages task/phase loops |
+
+| Explorer | `agent/subagents/explorer.md` | Codebase investigation (Phase 1) |
+| Planner | `agent/subagents/planner.md` | Solution design, atomic task specs, task briefs (Phase 2) |
+| Coder | `agent/subagents/coder.md` | Implementation per atomic task (Phase 3) |
+| Verifier | `agent/subagents/verifier.md` | 4-layer verification per atomic task (Phase 4) |
 
 All agents use OpenCode format (YAML frontmatter with `description` and `mode` fields, plain markdown body).
 
 ### Workflows
 
-| Workflow             | File                             | Purpose                                                    |
-| -------------------- | -------------------------------- | ---------------------------------------------------------- |
-| -------------------- | -------------------------------- | ---------------------------------------------------------- |
-| -------------------  | ----------------------------     | --------------------------------------------------------   |
-| EPCV Standard        | `workflows/epcv-standard.md`     | Full 11-stage iterative workflow with human gates          |
-| Explore Only         | `workflows/explore-only.md`      | Investigation without changes                              |
-| Verify Existing      | `workflows/verify-existing.md`   | Review existing code with 4-layer verification             |
+| Workflow        | File                           | Purpose                                           |
+| --------------- | ------------------------------ | ------------------------------------------------- |
+| EPCV Standard   | `workflows/epcv-standard.md`   | Full 11-stage iterative workflow with human gates |
+| Explore Only    | `workflows/explore-only.md`    | Investigation without changes                     |
+| Verify Existing | `workflows/verify-existing.md` | Review existing code with 4-layer verification    |
 
 ### Context
 
-| Category     | Directory                 | Contents                                                                                              |
-| ------------ | ------------------------- | ----------------------------------------------------------------------------------------------------- |
-| ------------ | ------------------------- | ----------------------------------------------------------------------------------------------------- |
-| -----------  | -----------------------   | ------------------------------------------------------------------------------------------            |
-| Domain       | `context/domain/`         | EPCV methodology (iterative workflow, atomic tasks, human gates), agent roles                         |
-| Processes    | `context/processes/`      | Workflow process (11 stages), complexity classification                                               |
-| Standards    | `context/standards/`      | Quality criteria, validation rules (with human gates), error handling (with bug-fixing loop escape)   |
-| Templates    | `context/templates/`      | Output formats (atomic task spec, 4-layer verification report), common patterns                       |
+| Category  | Directory            | Contents                                                                                            |
+| --------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| Domain    | `context/domain/`    | EPCV methodology (iterative workflow, atomic tasks, human gates), agent roles                       |
+| Processes | `context/processes/` | Workflow process (11 stages), complexity classification                                             |
+| Standards | `context/standards/` | Quality criteria, validation rules (with human gates), error handling (with bug-fixing loop escape) |
+| Templates | `context/templates/` | Output formats (atomic task spec, 4-layer verification report), common patterns                     |
 
 ### Commands
 

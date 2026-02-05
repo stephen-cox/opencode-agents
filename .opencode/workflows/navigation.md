@@ -8,13 +8,11 @@
 
 Runs the full iterative workflow: Explore → [human approval] → Plan → [human approval] → Code → Verify → Commit (per task, per phase).
 
-| Complexity     | Approach                                                    | Duration        |
-| -------------- | ----------------------------------------------------------- | --------------- |
-| -------------- | ----------------------------------------------------------- | --------------- |
-| Simple         | Abbreviated: 1 phase, 1-2 tasks, concise approvals          | 5-15 min        |
-| Simple         | Abbreviated: 1 phase, 1-2 tasks, concise approvals          | 5-15 min        |
-| Moderate       | Standard: 1-2 phases, multiple tasks, full approvals        | 15-45 min       |
-| Complex        | Extended: multiple phases, ADRs, strict guardrails          | 45-90+ min      |
+| Complexity | Approach                                             | Duration   |
+| ---------- | ---------------------------------------------------- | ---------- |
+| Simple     | Abbreviated: 1 phase, 1-2 tasks, concise approvals   | 5-15 min   |
+| Moderate   | Standard: 1-2 phases, multiple tasks, full approvals | 15-45 min  |
+| Complex    | Extended: multiple phases, ADRs, strict guardrails   | 45-90+ min |
 
 **Use when**: You want to make changes to the codebase.
 

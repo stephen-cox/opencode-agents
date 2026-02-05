@@ -109,29 +109,25 @@ For cross-cutting changes with architectural impact:
 
 Each transition requires passing a quality gate:
 
-| Transition                   | Gate Criteria                                                             |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| -------------------------    | -----------------------------------------------------------------------   |
-| Explore → Approval           | Report complete, files identified, patterns documented                    |
-| Approval → Plan              | User has approved solution direction                                      |
-| Plan → Approval              | Atomic tasks with acceptance criteria, do-not-touch list defined          |
-| Approval → Code              | User has approved implementation plan                                     |
-| Code → Verify                | Task changes implemented, guardrails respected                            |
-| Verify → Commit              | PASS or PASS_WITH_WARNINGS status                                         |
-| Commit → Next Task           | Changes committed successfully                                            |
-| Phase Complete → Next Phase  | All tasks in phase verified and committed                                 |
+| Transition                  | Gate Criteria                                                    |
+| --------------------------- | ---------------------------------------------------------------- |
+| Explore → Approval          | Report complete, files identified, patterns documented           |
+| Approval → Plan             | User has approved solution direction                             |
+| Plan → Approval             | Atomic tasks with acceptance criteria, do-not-touch list defined |
+| Approval → Code             | User has approved implementation plan                            |
+| Code → Verify               | Task changes implemented, guardrails respected                   |
+| Verify → Commit             | PASS or PASS_WITH_WARNINGS status                                |
+| Commit → Next Task          | Changes committed successfully                                   |
+| Phase Complete → Next Phase | All tasks in phase verified and committed                        |
 
 ## Error Handling
 
-| Scenario                         | Action                                                             |
-| -------------------------------- | ------------------------------------------------------------------ |
-| -------------------------------- | ------------------------------------------------------------------ |
-| -----------------------------    | ----------------------------------------------------------------   |
-| Explorer finds ambiguity         | Flag as open question, ask user at approval gate                   |
-| Planner identifies blocker       | Surface to user at plan approval gate                              |
-| Coder discovers task spec issue  | Document deviation, continue if safe                               |
-| Verifier finds critical bug      | FAIL with fix instructions → retry (max 2 per task)                |
-| Bug-fixing loop detected         | Stop patching, return to Explore for new evidence                  |
-| 2 retries exhausted              | Escalate to user with full context                                 |
-| User rejects plan                | Return to Explore or modify plan per user direction                |
+| Scenario                        | Action                                              |
+| ------------------------------- | --------------------------------------------------- |
+| Explorer finds ambiguity        | Flag as open question, ask user at approval gate    |
+| Planner identifies blocker      | Surface to user at plan approval gate               |
+| Coder discovers task spec issue | Document deviation, continue if safe                |
+| Verifier finds critical bug     | FAIL with fix instructions → retry (max 2 per task) |
+| Bug-fixing loop detected        | Stop patching, return to Explore for new evidence   |
+| 2 retries exhausted             | Escalate to user with full context                  |
+| User rejects plan               | Return to Explore or modify plan per user direction |

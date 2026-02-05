@@ -4,40 +4,34 @@
 
 ### Exploration Errors
 
-| Error                                  | Handling                                                         |
-| -------------------------------------- | ---------------------------------------------------------------- |
-| -------------------------------------- | ---------------------------------------------------------------- |
-| ------------------------------------   | --------------------------------------------------------------   |
-| Conflicting requirements               | Flag to user at plan approval gate                               |
-| No viable approach found               | Present constraints to user, ask for guidance                    |
-| Missing information from Explorer      | Request re-exploration of specific area                          |
-| Circular dependencies in change order  | Break cycle, document's approach                                 |
-| Task cannot be made atomic             | Split further or document why it must be larger                  |
+| Error                                 | Handling                                        |
+| ------------------------------------- | ----------------------------------------------- |
+| Conflicting requirements              | Flag to user at plan approval gate              |
+| No viable approach found              | Present constraints to user, ask for guidance   |
+| Missing information from Explorer     | Request re-exploration of specific area         |
+| Circular dependencies in change order | Break cycle, document's approach                |
+| Task cannot be made atomic            | Split further or document why it must be larger |
 
 ### Coding Errors
 
-| Error                                 | Handling                                             |
-| ------------------------------------- | ---------------------------------------------------- |
-| ------------------------------------- | ---------------------------------------------------- |
-| -------                               | ----------                                           |
-| File not found (expected by plan)     | Document deviation, check if path changed            |
-| Edit target not found in file         | Re-read file, adjust edit to match current content   |
-| Pattern conflict discovered           | Document in implementation notes, follow plan        |
-| Unexpected file state                 | Re-read, document finding, adapt if safe             |
-| Do-not-touch list violation detected  | Revert the change, document the near-miss            |
+| Error                                | Handling                                           |
+| ------------------------------------ | -------------------------------------------------- |
+| File not found (expected by plan)    | Document deviation, check if path changed          |
+| Edit target not found in file        | Re-read file, adjust edit to match current content |
+| Pattern conflict discovered          | Document in implementation notes, follow plan      |
+| Unexpected file state                | Re-read, document finding, adapt if safe           |
+| Do-not-touch list violation detected | Revert the change, document the near-miss          |
 
 ### Verification Errors
 
-| Error                                   | Handling                                                         |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| --------------------------------------  | --------------------------------------------------------------   |
-| Test failure                            | Classify severity, include in report with layer                  |
-| Build failure                           | Critical issue, FAIL with fix instructions                       |
-| Missing test coverage                   | Warning unless critical path, note in report                     |
-| Performance regression                  | Warning or critical depending on severity                        |
-| Acceptance criteria not met             | Critical issue, FAIL with specific fix instructions              |
-| Definition of done incomplete           | FAIL if critical items, warning if minor items                   |
+| Error                         | Handling                                            |
+| ----------------------------- | --------------------------------------------------- |
+| Test failure                  | Classify severity, include in report with layer     |
+| Build failure                 | Critical issue, FAIL with fix instructions          |
+| Missing test coverage         | Warning unless critical path, note in report        |
+| Performance regression        | Warning or critical depending on severity           |
+| Acceptance criteria not met   | Critical issue, FAIL with specific fix instructions |
+| Definition of done incomplete | FAIL if critical items, warning if minor items      |
 
 ## Recovery Strategies
 

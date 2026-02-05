@@ -111,16 +111,14 @@
 
 ## Retry Rules
 
-| Condition                                                  | Action                                                                |
-| ---------------------------------------------------------- | --------------------------------------------------------------------- |
-| ---------------------------------------------------------- | --------------------------------------------------------------------- |
-| ----------------------------------------------------       | -------------------------------------------------------------------   |
-| Verification FAIL (retry 1)                                | Route to Coder with specific fix instructions from Verifier           |
-| Verification FAIL (retry 2)                                | Route to Coder with specific fix instructions from Verifier           |
-| Verification FAIL (retry 3 or same file patched 3+ times)  | Bug-fixing loop escape: return to Explore for new evidence            |
-| Bug-fixing loop escape also fails                          | Escalate to user with full context                                    |
-| Verification PASS_WITH_WARNINGS                            | Proceed to Commit with warnings noted                                 |
-| Any phase produces open questions                          | Surface at the next human approval gate                               |
+| Condition                                                 | Action                                                      |
+| --------------------------------------------------------- | ----------------------------------------------------------- |
+| Verification FAIL (retry 1)                               | Route to Coder with specific fix instructions from Verifier |
+| Verification FAIL (retry 2)                               | Route to Coder with specific fix instructions from Verifier |
+| Verification FAIL (retry 3 or same file patched 3+ times) | Bug-fixing loop escape: return to Explore for new evidence  |
+| Bug-fixing loop escape also fails                         | Escalate to user with full context                          |
+| Verification PASS_WITH_WARNINGS                           | Proceed to Commit with warnings noted                       |
+| Any phase produces open questions                         | Surface at the next human approval gate                     |
 
 ## Escalation Triggers
 
