@@ -18,6 +18,7 @@ requirements and approach.
 | `/explore <question>` | Investigate codebase without changes                                                 |
 | `/plan <task>`        | Explore and plan without implementing                                                |
 | `/code`               | Execute Code → Verify → Commit for an approved plan (use after `/plan`)              |
+| `/commit-epcv {n}`    | Commit task changes with auto-generated message (task number optional)               |
 | `/verify <code>`      | Review existing code with 4-layer verification                                       |
 
 ## System Components
@@ -54,13 +55,14 @@ All agents use OpenCode format (YAML frontmatter with `description` and `mode` f
 
 ### Commands
 
-| Command    | File                 | Agent             |
-| ---------- | -------------------- | ----------------- |
-| `/epcv`    | `command/epcv.md`    | epcv-orchestrator |
-| `/explore` | `command/explore.md` | explorer          |
-| `/plan`    | `command/plan.md`    | epcv-orchestrator |
-| `/code`    | `command/code.md`    | epcv-orchestrator |
-| `/verify`  | `command/verify.md`  | verifier          |
+| Command        | File                     | Agent             |
+| -------------- | ------------------------ | ----------------- |
+| `/epcv`        | `command/epcv.md`        | epcv-orchestrator |
+| `/explore`     | `command/explore.md`     | explorer          |
+| `/plan`        | `command/plan.md`        | epcv-orchestrator |
+| `/code`        | `command/code.md`        | epcv-orchestrator |
+| `/commit-epcv` | `command/commit-epcv.md` | epcv-orchestrator |
+| `/verify`      | `command/verify.md`      | verifier          |
 
 All commands use OpenCode format (YAML frontmatter with `description`, optional `agent`/`subtask`/`model`, body uses `$ARGUMENTS`).
 
