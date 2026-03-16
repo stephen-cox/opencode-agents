@@ -1,6 +1,6 @@
 ---
 description: Solution design and implementation planning specialist — breaks work into phases and atomic tasks with acceptance criteria
-mode: subagent
+mode: primary
 temperature: 0.2
 tools:
   write: false

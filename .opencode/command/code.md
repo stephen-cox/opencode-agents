@@ -1,39 +1,38 @@
 ---
-description: Execute the Code → Verify → Commit loop for an approved plan
-agent: epcv-orchestrator
+description: Implement an atomic task from an approved plan
+agent: coder
 ---
 
 # Code Command
 
-Execute the Code → Verify → Commit phases for a previously approved plan.
+Implement the following atomic task:
 
 $ARGUMENTS
 
-This command is designed to resume after `/plan` has been run and the plan has been approved. It skips the Explore and Plan phases and proceeds directly to implementation.
+This command is designed for executing individual atomic tasks from an approved plan.
 
 Follow these steps:
 
-1. Confirm that a plan exists from the current conversation (task specifications, do-not-touch list, patterns to follow)
-2. If no plan exists, inform the user they should run `/plan` first or provide the plan context
-3. For each task in the current phase: run @coder to implement, then @verifier to validate, then commit
-4. Loop through remaining tasks and phases
-5. Deliver a complete summary with all changes
+1. Review the task specification and task brief (from conversation context or provided arguments)
+2. If no task spec exists, ask the user to run `/plan` first or provide the task details
+3. Read every file before modifying it
+4. Verify files are NOT on the do-not-touch list before editing
+5. Implement the task following existing patterns precisely
+6. Document any deviations from the task spec
+7. Produce an implementation report with acceptance criteria status
+
+After implementation, the user should run `/verify` to validate the changes, then `/commit-epcv` to commit.
 
 ## Usage
 
-After running `/plan <request>` and reviewing the plan:
+With task context from a prior `/plan` run:
 
 ```text
-/code
+/code Implement task 1 from the approved plan
 ```
 
-Or provide additional context if resuming from a previous session:
+With explicit task details:
 
 ```text
-/code Continue with the approved plan for <feature description>
+/code Add input validation to the signup form — scope: src/auth/signup.ts, patterns: use zod schema validation matching existing forms
 ```
-
-## Prerequisites
-
-- A plan must have been created and approved (either in this session via `/plan` or provided as context)
-- The plan should include: task specifications, do-not-touch list, and patterns to follow

@@ -1,6 +1,6 @@
 ---
 description: Codebase exploration specialist — investigates files, maps dependencies, identifies patterns and risks before any changes are planned
-mode: subagent
+mode: primary
 temperature: 0.1
 tools:
   write: false

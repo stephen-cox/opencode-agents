@@ -2,30 +2,6 @@
 
 ## Component Testing Checklist
 
-### Orchestrator
-
-- [ ] Correctly classifies a simple request (single file, clear requirements)
-- [ ] Correctly classifies a moderate request (multiple files, dependencies)
-- [ ] Correctly classifies a complex request (cross-cutting, architectural)
-- [ ] Routes to @explorer first for every request
-- [ ] Passes appropriate filtered context to each subagent
-- [ ] Enforces quality gates between all 11 stages
-- [ ] Presents exploration findings at Human Gate #1 (post-Explore)
-- [ ] Waits for explicit user approval at Human Gate #1
-- [ ] Presents plan at Human Gate #2 (post-Plan)
-- [ ] Waits for explicit user approval at Human Gate #2
-- [ ] Handles user rejection at Human Gate #1 (re-explore or modify direction)
-- [ ] Handles user rejection at Human Gate #2 (modify plan or re-explore)
-- [ ] Manages the task loop (advances to next task after commit)
-- [ ] Manages the phase loop (returns to Plan for next phase)
-- [ ] Commits verified changes per task with clear message
-- [ ] Handles PASS verdict correctly (commits and advances)
-- [ ] Handles PASS_WITH_WARNINGS correctly (commits with warnings noted)
-- [ ] Handles FAIL verdict correctly (retries with Coder, max 2 per task)
-- [ ] Detects bug-fixing loop (same file patched 3+ times for same issue)
-- [ ] Triggers bug-fixing loop escape (returns to Explore for new evidence)
-- [ ] Escalates after bug-fixing loop escape also fails
-
 ### Explorer
 
 - [ ] Finds relevant files using glob patterns
@@ -91,46 +67,66 @@
 - [ ] Provides specific, actionable fix instructions on FAIL
 - [ ] Uses only bash + read tools (no write/edit)
 
+## Human Workflow Testing
+
+### Workflow Coordination
+
+- [ ] Human can classify request complexity (simple / moderate / complex)
+- [ ] Human can invoke `/explore` and receive a complete exploration report
+- [ ] Human can review exploration findings and decide on solution direction
+- [ ] Human can invoke `/plan` and receive atomic task specifications
+- [ ] Human can review the plan and approve before coding
+- [ ] Human can invoke `/code` per task and receive implementation reports
+- [ ] Human can invoke `/verify` per task and receive verification reports
+- [ ] Human can invoke `/commit-epcv` to commit verified changes
+- [ ] Human can manage the task loop (advance to next task)
+- [ ] Human can manage the phase loop (return to `/plan` for next phase)
+- [ ] Human can handle FAIL verdicts (re-run `/code` with fix instructions, max 2 retries)
+- [ ] Human can detect bug-fixing loops and re-run `/explore` for new evidence
+- [ ] Human can escalate when retries are exhausted
+
 ## Integration Testing
 
 ### Full EPCV Workflow
 
-- [ ] Simple task completes all 11 stages successfully
-- [ ] Moderate task completes all 11 stages with multiple tasks
-- [ ] Complex task completes all 11 stages with multiple phases
-- [ ] Context flows correctly between phases (filtered per agent)
-- [ ] Quality gates catch issues between stages
-- [ ] Human Gate #1 pauses workflow and waits for approval
-- [ ] Human Gate #2 pauses workflow and waits for approval
+- [ ] Simple task completes all stages successfully
+- [ ] Moderate task completes all stages with multiple tasks
+- [ ] Complex task completes all stages with multiple phases
+- [ ] Context flows correctly between commands (via conversation)
+- [ ] Human Gate #1 pauses workflow for exploration review
+- [ ] Human Gate #2 pauses workflow for plan review
 - [ ] Each task produces a self-contained commit
 - [ ] Task loop correctly advances through tasks in a phase
-- [ ] Phase loop correctly returns to Plan for next phase
+- [ ] Phase loop correctly returns to `/plan` for next phase
 
 ### Retry and Bug-Fixing Loop Flow
 
-- [ ] Verification FAIL triggers retry to Coder with fix instructions
+- [ ] Verification FAIL triggers human to re-run `/code` with fix instructions
 - [ ] Coder receives specific fix instructions from Verifier
 - [ ] Re-verification runs after fix
 - [ ] Second retry works if first fix is insufficient
 - [ ] Bug-fixing loop escape triggers after 2 retries exhausted
 - [ ] Bug-fixing loop escape triggers if same file patched 3+ times
-- [ ] Escape returns to Explore for new evidence
+- [ ] Escape returns to `/explore` for new evidence
 - [ ] Escalation occurs if escape also fails
 
 ### Human Gate Flows
 
-- [ ] User approves at Gate #1 → workflow proceeds to Plan
-- [ ] User rejects at Gate #1 → workflow re-explores or modifies direction
-- [ ] User approves at Gate #2 → workflow proceeds to Code
-- [ ] User rejects at Gate #2 → workflow modifies plan or re-explores
+- [ ] User approves at Gate #1 → proceeds to `/plan`
+- [ ] User rejects at Gate #1 → re-runs `/explore` or modifies direction
+- [ ] User approves at Gate #2 → proceeds to `/code`
+- [ ] User rejects at Gate #2 → modifies plan or re-explores
 - [ ] Simple tasks get concise approval summaries
 - [ ] Complex tasks get full reports at approval gates
 
-### Partial Workflows
+### Individual Commands
 
-- [ ] `/explore` runs exploration only and delivers report (no approval gates)
-- [ ] `/plan` runs exploration + planning and delivers both (with approval gates)
-- [ ] `/verify` runs 4-layer verification on existing code (no approval gates)
+- [ ] `/explore` runs exploration only and delivers report
+- [ ] `/plan` produces atomic task specs and delivers plan
+- [ ] `/code` implements a single atomic task and delivers report
+- [ ] `/verify` runs 4-layer verification and delivers report
+- [ ] `/commit-epcv` commits changes with task-based message
+- [ ] `/epcv` shows workflow reference
 
 ## Atomic Task Scenarios
 
@@ -159,10 +155,10 @@
 ## Validation Procedure
 
 1. Start with a simple, well-defined task
-2. Verify each stage produces expected output format
+2. Verify each command produces expected output format
 3. Verify Human Gate #1 pauses and presents findings correctly
 4. Verify Human Gate #2 pauses and presents plan correctly
-5. Check that context passes correctly between phases (filtered)
+5. Check that context passes correctly between commands
 6. Verify atomic task specs have all 7 fields
 7. Verify 4-layer verification report is produced
 8. Verify commit is created per task

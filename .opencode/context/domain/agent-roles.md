@@ -1,28 +1,21 @@
 # Agent Roles and Responsibilities
 
-## Orchestrator (epcv-orchestrator)
+## Human (Workflow Driver)
 
-**Role**: Workflow coordinator, request classifier, and human gate enforcer
+**Role**: Workflow coordinator, request classifier, and approval gate enforcer
 
-**Responsibilities**:
+The human drives the EPCV workflow by invoking commands directly. There is no
+orchestrator agent — the human performs all coordination tasks:
 
-- Receive and parse user requests
-- Classify complexity (simple / moderate / complex)
-- Route to subagents in sequence with appropriate context
-- Enforce quality gates between phases
-- Enforce two mandatory human approval gates (post-Explore, post-Plan)
-- Manage the iterative task loop and phase loop
+- Classify request complexity (simple / moderate / complex)
+- Invoke agents in sequence via commands (`/explore`, `/plan`, `/code`, `/verify`, `/commit-epcv`)
+- Review output at each step and approve at human gates
+- Manage the task loop (advance to next task after commit)
+- Manage the phase loop (return to `/plan` for next phase)
+- Handle retries on verification failure (re-run `/code` with fix instructions, max 2 per task)
+- Detect bug-fixing loops and re-run `/explore` for new evidence
 - Commit verified changes per task
-- Handle retries on verification failure (max 2 per task)
-- Detect and trigger bug-fixing loop escape
-- Deliver final results with summary
-
-**Does NOT**:
-
-- Explore code directly
-- Write implementation plans
-- Write code
-- Run tests
+- Escalate when retries are exhausted
 
 ---
 
@@ -40,9 +33,9 @@
 - Produce structured exploration report
 - Flag open questions for the human approval gate
 
-**Triggers**: Every EPCV workflow (Stage 2)
+**Triggers**: `/explore` command
 
-**Receives**: User request, complexity classification, known affected areas
+**Receives**: User request, complexity context
 
 **Produces**: Exploration report (files, patterns, dependencies, risks, open questions)
 
@@ -65,7 +58,7 @@
 - Document architecture decisions (moderate/complex)
 - Scale planning depth by complexity
 
-**Triggers**: After human approval of solution direction (Stage 4)
+**Triggers**: `/plan` command (after human approval of solution direction)
 
 **Receives**: User request, exploration report, approved direction, complexity
 
@@ -90,7 +83,7 @@
 - Detect bug-fixing loops (same file patched 3+ times for same issue)
 - Report implementation status with acceptance criteria status
 
-**Triggers**: Per atomic task within a phase (Stage 6)
+**Triggers**: `/code` command (per atomic task within a phase)
 
 **Receives**: Task specification, task brief, do-not-touch list, patterns to follow
 
@@ -115,7 +108,7 @@
 - Produce PASS / FAIL / PASS_WITH_WARNINGS verdict
 - Provide specific fix instructions on FAIL
 
-**Triggers**: Per atomic task after Coder completes (Stage 7)
+**Triggers**: `/verify` command (per atomic task after Coder completes)
 
 **Receives**: Task spec (acceptance criteria, definition of done, risk level), changes made, manual test steps
 
@@ -130,27 +123,29 @@ User Request
     │
     ▼
 ┌─────────────┐
-│ Orchestrator │ ← Classifies complexity
+│ Human (You) │ ← Classifies complexity, drives workflow
 └──────┬──────┘
        │
        ▼
 ┌──────────┐
-│ Explorer  │ ← Produces exploration report
+│ /explore │ ← Produces exploration report
+│ Explorer │
 └────┬─────┘
      │ exploration_report
      ▼
 ┌─────────────┐
-│ Human Gate  │ ← User approves solution direction
+│ Human Gate  │ ← You approve solution direction
 └──────┬──────┘
       │ approved_direction
       ▼
 ┌──────────┐
-│ Planner  │ ← Produces phases + atomic task specs + task briefs
+│ /plan    │ ← Produces phases + atomic task specs + task briefs
+│ Planner  │
 └────┬─────┘
      │ phase_breakdown, task_specs, task_briefs, do_not_touch
      ▼
 ┌─────────────┐
-│ Human Gate  │ ← User approves implementation plan
+│ Human Gate  │ ← You approve implementation plan
 └──────┬──────┘
       │
       ▼
@@ -158,38 +153,36 @@ User Request
 │ Task Loop (per task in current phase)        │
 │                                              │
 │  ┌──────────┐                                │
-│  │  Coder   │ ← Implements atomic task       │
+│  │ /code    │ ← Implements atomic task       │
+│  │ Coder    │                                │
 │  └────┬─────┘                                │
 │       │ changes_made                         │
 │       ▼                                      │
 │  ┌──────────┐                                │
-│  │ Verifier │ ← 4-layer verification         │
+│  │ /verify  │ ← 4-layer verification         │
+│  │ Verifier │                                │
 │  └────┬─────┘                                │
 │       │ PASS / FAIL                          │
 │       ▼                                      │
-│  ┌──────────┐                                │
-│  │  Commit  │ ← Self-contained commit        │
-│  └──────────┘                                │
+│  ┌─────────────┐                             │
+│  │ /commit-epcv│ ← Self-contained commit     │
+│  └─────────────┘                             │
 │       │                                      │
 │       ▼ next task (or exit loop)             │
 └──────────────────────────────────────────────┘
        │
-       ▼ Phase Loop: more phases → back to Planner
-       │              no more → Deliver
-       ▼
-┌─────────────┐
-│ Orchestrator │ ← Delivers complete results
-└─────────────┘
+       ▼ Phase Loop: more phases → back to /plan
+       │              no more → Done
 ```
 
 ### Retry Flow (within Task Loop)
 
 ```text
-Verify FAIL → Coder (fix instructions, retry 1) → Verify
+/verify FAIL → /code (fix instructions, retry 1) → /verify
                                                       │
-                                         FAIL → Coder (retry 2) → Verify
+                                         FAIL → /code (retry 2) → /verify
                                                                      │
                                                         FAIL → Bug-fixing loop escape
-                                                               (return to Explore)
+                                                               (/explore for new evidence)
                                                                → Escalate if still fails
 ```

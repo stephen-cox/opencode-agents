@@ -17,21 +17,23 @@ exploration for context, then full 4-layer verification.
 
 ### Stage 1: Scope
 
-**Agent**: Orchestrator (self)
+**Actor**: Human
 **Action**: Determine what to verify and against what criteria
 **Inputs**: User's verification request, files/changes to review
 **Outputs**: Verification scope, risk level, criteria
 
 ### Stage 2: Explore (abbreviated)
 
-**Agent**: @explorer
+**Command**: `/explore`
+**Agent**: Explorer
 **Action**: Quick context gathering for the files under review
 **Inputs**: Files to verify
 **Outputs**: Brief context report (patterns, dependencies)
 
 ### Stage 3: Verify
 
-**Agent**: @verifier
+**Command**: `/verify`
+**Agent**: Verifier
 **Action**: Full 4-layer verification of specified code
 **Inputs**: Files to verify, context report, user's criteria, risk level
 **Outputs**: Verification report with layered results
@@ -44,12 +46,12 @@ exploration for context, then full 4-layer verification.
 - Verification depth matches risk level
 - Clear PASS / FAIL / PASS_WITH_WARNINGS verdict produced
 
-### Stage 4: Deliver
+### Stage 4: Review
 
-**Agent**: Orchestrator (self)
-**Action**: Present verification results
+**Actor**: Human
+**Action**: Review verification results
 **Inputs**: Verification report
-**Outputs**: Formatted results with actionable feedback
+**Outputs**: Decision on next steps (fix issues, accept, etc.)
 
 No human approval gates are needed since this is a review-only workflow.
 

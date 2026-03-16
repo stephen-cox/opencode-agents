@@ -1,6 +1,6 @@
 ---
 description: Verification and QA specialist — validates implementations through layered checks (automated, behavioural, operational, security) scaled by risk level
-mode: subagent
+mode: primary
 temperature: 0.1
 tools:
   write: false

@@ -1,9 +1,10 @@
 ---
 id: TASK-1.2
 title: Clarify orchestrator write/edit permissions are for commits only
-status: To Do
+status: Done
 assignee: []
 created_date: "2026-02-05 21:38"
+updated_date: "2026-03-16 21:25"
 labels:
   - epcv
   - orchestrator
@@ -40,3 +41,11 @@ The write/edit permissions are likely needed for the commit stage (Stage 8), but
 - [ ] #2 Documentation explains why orchestrator has write/edit permissions
 - [ ] #3 No ambiguity about when orchestrator can use write/edit vs when Coder should be invoked
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+
+Resolved by removing the orchestrator agent entirely. The orchestrator's write/edit permissions were needed for commits, but since the orchestrator has been removed and commands now route directly to specialised agents, this ambiguity no longer exists. The coder agent (which handles /commit-epcv) legitimately has write/edit/bash permissions.
+
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -1,21 +1,39 @@
 ---
-description: Run the full Explore → Plan → Code → Verify workflow
-agent: epcv-orchestrator
+description: Show the EPCV workflow sequence and available commands
 ---
 
-# EPCV Command
+# EPCV Workflow Reference
 
-Run the full EPCV workflow for the following request:
+The EPCV workflow for your request:
 
 $ARGUMENTS
 
-Follow the complete iterative workflow:
+## Workflow Sequence
 
-1. Classify the request complexity (simple / moderate / complex)
-2. Run @explorer to investigate the codebase
-3. Present exploration findings and get human approval on solution direction
-4. Run @planner to produce phases and atomic task specifications
-5. Present the plan and get human approval before coding
-6. For each task: run @coder to implement, then @verifier to validate, then commit
-7. Loop through remaining tasks and phases
-8. Deliver a complete summary with all changes
+Run these commands in order, reviewing output at each step:
+
+1. **Explore**: `/explore <request>` — Investigate the codebase (read-only)
+2. **Review** — Read the exploration report, approve the solution direction
+3. **Plan**: `/plan <request>` — Design the solution and produce atomic task specs
+4. **Review** — Read the plan, approve before coding begins
+5. **Code**: `/code <task brief>` — Implement each atomic task
+6. **Verify**: `/verify <what changed>` — Validate with 4-layer checks
+7. **Commit**: `/commit-epcv {n}` — Commit verified changes per task
+8. **Loop** — Repeat steps 5-7 for remaining tasks, then repeat steps 3-7 for remaining phases
+
+## Quick Reference
+
+| Command               | Agent    | Purpose                                     |
+| --------------------- | -------- | ------------------------------------------- |
+| `/explore <question>` | Explorer | Investigate codebase without changes        |
+| `/plan <task>`        | Planner  | Design solution with atomic task specs      |
+| `/code <brief>`       | Coder    | Implement an atomic task                    |
+| `/verify <changes>`   | Verifier | 4-layer verification of changes             |
+| `/commit-epcv {n}`    | Coder    | Commit task changes with task-based message |
+
+## Human Gates
+
+You are the orchestrator. Two approval points:
+
+1. **Post-Explore**: Review findings, approve solution direction before planning
+2. **Post-Plan**: Review task specs, approve before coding begins

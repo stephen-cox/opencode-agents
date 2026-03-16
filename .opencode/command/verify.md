@@ -1,7 +1,6 @@
 ---
 description: Review existing code for quality and correctness
 agent: verifier
-subtask: true
 ---
 
 # Verify Command

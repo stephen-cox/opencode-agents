@@ -1,6 +1,6 @@
 ---
 description: Commit task changes with auto-generated message referencing task number
-agent: epcv-orchestrator
+agent: coder
 ---
 
 # Commit-EPCV Command

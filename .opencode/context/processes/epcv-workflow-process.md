@@ -4,13 +4,14 @@
 
 ### 1. Request Intake
 
-- User submits a request (feature, bugfix, refactor, exploration)
-- Orchestrator parses intent and affected areas
-- Complexity is classified: simple / moderate / complex
+- User has a request (feature, bugfix, refactor, exploration)
+- User classifies complexity: simple / moderate / complex
+- User decides which command to start with
 
 ### 2. Exploration Phase
 
-- Explorer searches codebase for relevant files
+- User runs `/explore` to investigate the codebase
+- Explorer searches for relevant files
 - Dependencies are mapped
 - Existing patterns are documented
 - Risks are identified
@@ -18,12 +19,13 @@
 
 ### 3. Human Approval: Solution Direction
 
-- Present exploration findings and proposed solution direction to user
-- Surface open questions and trade-offs
+- User reviews exploration findings and proposed solution direction
+- User surfaces open questions and trade-offs
 - **Gate**: User approves the solution direction before planning begins
 
 ### 4. Planning Phase
 
+- User runs `/plan` with the approved direction
 - Planner reviews exploration report and approved direction
 - Solution is designed with rationale
 - Work is broken into phases (milestones) for moderate/complex tasks
@@ -36,12 +38,13 @@
 
 ### 5. Human Approval: Implementation Plan
 
-- Present the phase breakdown and task specifications to user
-- Show do-not-touch list and guardrails
+- User reviews the phase breakdown and task specifications
+- User reviews do-not-touch list and guardrails
 - **Gate**: User approves the plan before coding begins
 
 ### 6. Code Phase (per task)
 
+- User runs `/code` with the task brief
 - Coder receives a single atomic task specification and task brief
 - Coder reads each file before modifying
 - Changes are implemented following the task brief
@@ -52,6 +55,7 @@
 
 ### 7. Verify Phase (per task)
 
+- User runs `/verify` to validate the changes
 - Verifier checks the task through four layers:
   1. **Automated**: unit tests, integration tests, lint, type check, build
   2. **Behavioural**: manual test steps, edge cases, failure paths
@@ -63,47 +67,41 @@
 
 ### 8. Commit (per task)
 
-- Verified changes are committed as a logical, self-contained unit
+- User runs `/commit-epcv` to commit verified changes
+- Changes are committed as a logical, self-contained unit
 - Commit message references the task scope
 
 ### 9. Task Loop
 
-- If there are more tasks in the current phase → return to step 6 (Code)
+- If there are more tasks in the current phase → return to step 6 (`/code`)
 - If no more tasks → proceed to Phase Loop
 
 ### 10. Phase Loop
 
-- If there are more phases → return to step 4 (Plan) to detail the next phase's tasks
-- If no more phases → proceed to Deliver
-
-### 11. Delivery
-
-- Present complete summary to user
-- Include exploration findings, plan summary, changes by task, verification results
+- If there are more phases → return to step 4 (`/plan`) to detail the next phase's tasks
+- If no more phases → Done
 
 ## Abbreviated Workflow (Simple Tasks)
 
 For simple, single-file changes with clear requirements:
 
-1. Quick explore (targeted file search, 1-level dependency check)
-2. Concise approval (confirm direction with user)
-3. Brief plan (1 phase, 1-2 atomic tasks with acceptance criteria)
-4. Concise approval (confirm plan with user)
-5. Code → Verify → Commit (per task)
-6. Deliver
+1. Quick `/explore` (targeted file search, 1-level dependency check)
+2. Review findings, confirm direction
+3. Brief `/plan` (1 phase, 1-2 atomic tasks with acceptance criteria)
+4. Review plan, confirm approach
+5. `/code` → `/verify` → `/commit-epcv` (per task)
 
 ## Extended Workflow (Complex Tasks)
 
 For cross-cutting changes with architectural impact:
 
-1. Deep explore (comprehensive subsystem search, full dependency graph)
-2. Full approval (present options and trade-offs to user)
-3. Architecture plan (multiple phases, ADRs, strict do-not-touch list)
-4. Full approval (user reviews phase breakdown and task specs)
+1. Deep `/explore` (comprehensive subsystem search, full dependency graph)
+2. Full review (consider options and trade-offs)
+3. Architecture `/plan` (multiple phases, ADRs, strict do-not-touch list)
+4. Full review (phase breakdown and task specs)
 5. For each phase:
-   - Detail task specifications for the phase
-   - For each task: Code → Verify → Commit
-6. Deliver
+   - `/plan` to detail task specifications for the phase
+   - For each task: `/code` → `/verify` → `/commit-epcv`
 
 ## Quality Gates
 
@@ -122,12 +120,12 @@ Each transition requires passing a quality gate:
 
 ## Error Handling
 
-| Scenario                        | Action                                              |
-| ------------------------------- | --------------------------------------------------- |
-| Explorer finds ambiguity        | Flag as open question, ask user at approval gate    |
-| Planner identifies blocker      | Surface to user at plan approval gate               |
-| Coder discovers task spec issue | Document deviation, continue if safe                |
-| Verifier finds critical bug     | FAIL with fix instructions → retry (max 2 per task) |
-| Bug-fixing loop detected        | Stop patching, return to Explore for new evidence   |
-| 2 retries exhausted             | Escalate to user with full context                  |
-| User rejects plan               | Return to Explore or modify plan per user direction |
+| Scenario                        | Action                                                    |
+| ------------------------------- | --------------------------------------------------------- |
+| Explorer finds ambiguity        | Flag as open question, user reviews at approval gate      |
+| Planner identifies blocker      | Surface to user at plan approval gate                     |
+| Coder discovers task spec issue | Document deviation, continue if safe                      |
+| Verifier finds critical bug     | FAIL with fix instructions → user re-runs `/code` (max 2) |
+| Bug-fixing loop detected        | Stop patching, user re-runs `/explore` for new evidence   |
+| 2 retries exhausted             | User reviews full context and decides next steps          |
+| User rejects plan               | User re-runs `/explore` or modifies plan                  |

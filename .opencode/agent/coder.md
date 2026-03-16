@@ -1,7 +1,6 @@
 ---
 description: Code implementation specialist — executes atomic task specifications precisely, following existing patterns and respecting guardrails
-mode: subagent
-hidden: true
+mode: primary
 temperature: 0.1
 tools:
   write: true

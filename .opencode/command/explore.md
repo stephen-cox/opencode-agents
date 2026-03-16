@@ -1,7 +1,6 @@
 ---
 description: Investigate the codebase without making changes
 agent: explorer
-subtask: true
 ---
 
 # Explore Command

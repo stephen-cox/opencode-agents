@@ -1,9 +1,10 @@
 ---
 id: TASK-1.4
 title: Document why Coder agent is hidden
-status: To Do
+status: Done
 assignee: []
 created_date: "2026-02-05 21:38"
+updated_date: "2026-03-16 21:25"
 labels:
   - epcv
   - documentation
@@ -34,3 +35,11 @@ ARCHITECTURE.md mentions the Coder is hidden but doesn't explain the rationale. 
 - [ ] #2 Rationale documented: Coder should only be invoked by orchestrator after exploration and planning
 - [ ] #3 Agent format section in ARCHITECTURE.md mentions hidden as an option with explanation
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+
+Resolved by removing the orchestrator agent and unhiding the coder. The coder was hidden because it was meant to be invoked only by the orchestrator. With the orchestrator removed, the coder is now a primary agent invoked directly via /code command, so hidden: true has been removed.
+
+<!-- SECTION:FINAL_SUMMARY:END -->

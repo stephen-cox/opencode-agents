@@ -1,20 +1,23 @@
 ---
-description: Explore and plan a solution without implementing it
-agent: epcv-orchestrator
+description: Design a solution with atomic task specifications
+agent: planner
 ---
 
 # Plan Command
 
-Run only the Explore and Plan phases for the following request:
+Design a solution and produce atomic task specifications for the following request:
 
 $ARGUMENTS
 
 Follow these steps:
 
-1. Classify the request complexity
-2. Run @explorer to investigate the codebase
-3. Present exploration findings for review
-4. Run @planner to produce phases and atomic task specifications
-5. Present the full plan including phase breakdown, task specifications, do-not-touch list, and test strategy
+1. Review any exploration report from a prior `/explore` run (if available in conversation context)
+2. If no exploration has been done, perform a quick codebase investigation to gather context
+3. Design the optimal solution approach with rationale
+4. Break work into phases (milestones) for moderate/complex tasks
+5. Produce atomic task specifications for the current phase, each with: scope, non-goals, acceptance criteria, definition of done, automated tests, manual test steps, rollback note, risk level
+6. Produce task briefs for the Coder (scope, constraints, files, assumptions, patterns)
+7. Define the do-not-touch list and dependency guardrails
+8. Present the full plan for human review
 
-Do NOT proceed to the Code or Verify phases. Stop after presenting the plan.
+Do NOT proceed to implementation. Stop after presenting the plan.

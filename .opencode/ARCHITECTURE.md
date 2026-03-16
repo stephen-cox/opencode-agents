@@ -7,9 +7,9 @@
                           │
                           ▼
                ┌─────────────────────┐
-               │   EPCV Orchestrator  │
-               │  (Request Classifier │
-               │   + Phase Router)    │
+               │   Human (You)       │
+               │  (Classify request, │
+               │   drive workflow)   │
                └──────────┬──────────┘
                           │
            ┌──────────────┼──────────────┐
@@ -23,26 +23,24 @@
                           │
                           ▼
                ┌─────────────────────┐
-               │     @explorer       │ ← Stage 2: Understand
-               │  (Codebase Search,  │
-               │   Pattern Analysis) │
+               │  /explore           │ ← Phase 1: Understand
+               │  (Explorer agent)   │
                └──────────┬──────────┘
                           │ exploration_report
                           ▼
                ┌─────────────────────┐
-               │   Human Gate #1     │ ← Stage 3: Approve solution direction
+               │   Human Gate #1     │ ← Review findings, approve direction
                └──────────┬──────────┘
                           │ approved_direction
                           ▼
                ┌─────────────────────┐
-               │     @planner        │ ← Stage 4: Design (phases + atomic tasks)
-               │  (Phase Breakdown,  │
-               │   Task Specs/Briefs)│
+               │  /plan              │ ← Phase 2: Design (phases + atomic tasks)
+               │  (Planner agent)    │
                └──────────┬──────────┘
                           │ task_specs, task_briefs, do_not_touch
                           ▼
                ┌─────────────────────┐
-               │   Human Gate #2     │ ← Stage 5: Approve implementation plan
+               │   Human Gate #2     │ ← Review plan, approve before coding
                └──────────┬──────────┘
                           │
                           ▼
@@ -50,77 +48,79 @@
                │  Task Loop (per task in phase)       │
                │                                     │
                │  ┌─────────────────────┐            │
-               │  │      @coder         │ ← Stage 6  │
-               │  │  (Atomic Task Impl) │            │
+               │  │  /code              │ ← Phase 3  │
+               │  │  (Coder agent)      │            │
                │  └──────────┬──────────┘            │
                │             │ changes_made           │
                │             ▼                        │
                │  ┌─────────────────────┐            │
-               │  │     @verifier       │ ← Stage 7  │
-               │  │  (4-Layer Checks)   │            │
+               │  │  /verify            │ ← Phase 4  │
+               │  │  (Verifier agent)   │            │
                │  └──────────┬──────────┘            │
                │             │ PASS / FAIL            │
                │             ▼                        │
                │  ┌─────────────────────┐            │
-               │  │      Commit         │ ← Stage 8  │
+               │  │  /commit-epcv       │ ← Commit   │
                │  └──────────┬──────────┘            │
                │             │                        │
                │             ▼ next task or exit      │
                └─────────────────────────────────────┘
                           │
-                          ▼ Phase Loop (Stage 10)
+                          ▼ Phase Loop
                      ┌────┴────┐
                      │         │
                ┌─────▼───┐ ┌──▼──────┐
                │ More     │ │ No more │
                │ phases   │ │ phases  │
-               │→ Plan    │ │→ Deliver│
+               │→ /plan   │ │→ Done   │
                └─────────┘ └─────────┘
 ```
 
 ### Retry Flow (within Task Loop)
 
 ```text
-Verify FAIL → Coder (fix instructions, retry 1) → Verify
+/verify FAIL → /code (fix instructions, retry 1) → /verify
                                                       │
-                                         FAIL → Coder (retry 2) → Verify
+                                         FAIL → /code (retry 2) → /verify
                                                                      │
                                                         FAIL → Bug-fixing loop escape
-                                                               (return to Explore)
+                                                               (/explore for new evidence)
                                                                → Escalate if still fails
 ```
 
 ## Component Relationships
 
-### Orchestrator → Subagents (Manager-Worker Pattern)
+### Human-Driven Routing (No Orchestrator)
 
-The Orchestrator never performs phase work directly. It:
+The human drives the workflow by invoking commands directly. There is no orchestrator
+agent. Each command routes to a specialised agent:
 
-1. Classifies the request
-2. Routes to the appropriate subagent with filtered context
-3. Receives the subagent's output
-4. Checks the quality gate
-5. Presents results at human approval gates (post-Explore, post-Plan)
-6. Manages the task loop and phase loop
-7. Commits verified changes per task
-8. Routes to the next subagent or delivers results
+1. `/explore` → Explorer agent (read-only investigation)
+2. Review exploration report, approve direction
+3. `/plan` → Planner agent (solution design, atomic task specs)
+4. Review plan, approve before coding
+5. `/code` → Coder agent (implement atomic task)
+6. `/verify` → Verifier agent (4-layer validation)
+7. `/commit-epcv` → Coder agent (commit verified changes)
+8. Loop through remaining tasks and phases
 
-### Context Flow (Filtered)
+### Context Flow
 
-Each subagent receives only the context it needs:
+Each agent receives context through the conversation. The human provides
+relevant context from prior phases when invoking each command:
 
-| Agent    | Receives                                                               | Does NOT Receive                           |
-| -------- | ---------------------------------------------------------------------- | ------------------------------------------ |
-| Explorer | Request, complexity, known affected areas                              | Plans, code changes, verification          |
-| Planner  | Request, exploration report, approved direction, complexity            | Code changes, verification                 |
-| Coder    | Task spec, task brief, do-not-touch list, patterns                     | Raw exploration, other tasks, verification |
-| Verifier | Task spec (acceptance criteria, DoD, risk), changes, manual test steps | Exploration details, task briefs           |
+| Agent    | Needs From Prior Phases                                  |
+| -------- | -------------------------------------------------------- |
+| Explorer | User request, complexity assessment                      |
+| Planner  | User request, exploration report, approved direction     |
+| Coder    | Task spec, task brief, do-not-touch list, patterns       |
+| Verifier | Task spec (acceptance criteria, DoD, risk), changes made |
 
-### Quality Gates (11-Stage Enforcement)
+### Quality Gates
 
 ```text
-Classify → Explore ──gate──▶ Human Approval ──gate──▶ Plan ──gate──▶ Human Approval
-    ──gate──▶ Code ──gate──▶ Verify ──gate──▶ Commit ──gate──▶ Task Loop ──gate──▶ Phase Loop → Deliver
+/explore ──gate──▶ Human Approval ──gate──▶ /plan ──gate──▶ Human Approval
+    ──gate──▶ /code ──gate──▶ /verify ──gate──▶ /commit-epcv ──gate──▶ Task Loop
 ```
 
 Each gate checks specific criteria before allowing progression.
@@ -131,15 +131,33 @@ Human gates require explicit user approval.
 
 All agents use OpenCode format:
 
-- YAML frontmatter with `description` (required) and `mode` (`primary` or `subagent`)
-- Optional: `temperature`, `tools` (map of tool→boolean), `permission` (map with bash glob support), `hidden`, `color`
+- YAML frontmatter with `description` (required) and `mode: primary`
+- Optional: `temperature`, `tools` (map of tool→boolean), `permission` (map with bash glob support)
 - Body is plain markdown (no XML tags)
 
 ## Design Decisions
 
+### Why No Orchestrator?
+
+The EPCV workflow has two mandatory human approval gates. Since the human is
+already present at every decision point, an orchestrator agent adds indirection
+without proportional value. The human naturally:
+
+- Classifies request complexity
+- Routes to the appropriate agent via commands
+- Reviews output and approves at gates
+- Decides whether to retry, loop, or escalate
+- Manages the task and phase loops
+
+Removing the orchestrator simplifies the architecture, eliminates permission
+ambiguity (the orchestrator needed write/edit for commits but shouldn't write code),
+and gives the human more direct control.
+
 ### Why an Iterative Workflow?
 
-The guide's flowchart is iterative: tasks loop within phases, phases loop within plans. A single-pass workflow cannot handle multi-task features or multi-phase projects. The iterative structure ensures:
+The workflow is iterative: tasks loop within phases, phases loop within plans.
+A single-pass workflow cannot handle multi-task features or multi-phase projects.
+The iterative structure ensures:
 
 - Each task is independently verified and committed
 - Later phases are planned in detail only when reached
@@ -147,7 +165,7 @@ The guide's flowchart is iterative: tasks loop within phases, phases loop within
 
 ### Why Human Gates?
 
-The guide requires human-in-the-loop at two points. Without approval gates:
+Without approval gates:
 
 - The assistant might pursue the wrong solution direction
 - The plan might not match the developer's intent
@@ -155,7 +173,7 @@ The guide requires human-in-the-loop at two points. Without approval gates:
 
 ### Why Atomic Tasks?
 
-The guide defines atomic tasks as the fundamental unit of work. Without them:
+Without them:
 
 - Changes are too large to review confidently
 - Failures are hard to isolate and revert
@@ -176,14 +194,17 @@ Each agent has a focused responsibility and optimised configuration:
 
 - **Explorer**: Read-only tools (read, glob, grep), temperature 0.1
 - **Planner**: Read-only tools, temperature 0.2 (slightly more creative for design)
-- **Coder**: Full tools (write, edit, bash, read, glob, grep), temperature 0.1, hidden
+- **Coder**: Full tools (write, edit, bash, read, glob, grep), temperature 0.1
 - **Verifier**: Bash + read (no write/edit), temperature 0.1, all bash commands allowed
 
-Separation prevents the "do everything at once" anti-pattern that leads to skipped steps and lower quality.
+Separation prevents the "do everything at once" anti-pattern that leads to skipped
+steps and lower quality.
 
 ### Why Bug-Fixing Loop Escape?
 
-Repeated iterations of small patches without new information result in wasted effort and increasingly convoluted code. The escape pattern forces a return to Explore to gather new evidence and refine the hypothesis before continuing.
+Repeated iterations of small patches without new information result in wasted effort
+and increasingly convoluted code. The escape pattern forces a return to Explore to
+gather new evidence and refine the hypothesis before continuing.
 
 ### Why Complexity Classification?
 
@@ -198,7 +219,7 @@ Classification ensures appropriate effort for each task.
 
 | Metric              | Expected                                       |
 | ------------------- | ---------------------------------------------- |
-| Context efficiency  | High — filtered passing per subagent           |
+| Context efficiency  | High — each agent gets only relevant context   |
 | First-pass success  | ~80% — exploration prevents blind errors       |
 | Retry success rate  | ~95% — specific fix instructions from Verifier |
 | Human gate overhead | Minimal — concise summaries for simple tasks   |

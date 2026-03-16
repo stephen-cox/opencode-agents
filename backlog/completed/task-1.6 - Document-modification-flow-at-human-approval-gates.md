@@ -1,9 +1,10 @@
 ---
 id: TASK-1.6
 title: Document modification flow at human approval gates
-status: To Do
+status: Done
 assignee: []
 created_date: "2026-02-05 21:39"
+updated_date: "2026-03-16 21:25"
 labels:
   - epcv
   - documentation
@@ -41,3 +42,11 @@ The error-handling.md mentions "Return to Explore with user's feedback" but does
 - [ ] #3 Post-Plan modification flow documented (re-run Planner vs adjust plan)
 - [ ] #4 Error handling documentation updated with specific modification procedures
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+
+Resolved by removing the orchestrator agent. The modification flow at human approval gates is now straightforward: the human reviews output, decides to approve/reject/modify, and invokes the appropriate command. No orchestrator needs to handle re-routing. This is documented in the updated agent-roles.md and epcv-workflow-process.md.
+
+<!-- SECTION:FINAL_SUMMARY:END -->

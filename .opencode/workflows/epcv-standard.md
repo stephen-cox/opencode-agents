@@ -3,8 +3,9 @@
 ## Overview
 
 The iterative Explore → Plan → Code → Verify workflow. Work is broken into phases
-and atomic tasks. Each task is coded, verified, and committed individually. Human
-approval gates ensure the developer remains in control of requirements and approach.
+and atomic tasks. Each task is coded, verified, and committed individually. The human
+drives the workflow by invoking commands directly. Human approval gates ensure the
+developer remains in control of requirements and approach.
 
 ## Context Dependencies
 
@@ -19,15 +20,16 @@ approval gates ensure the developer remains in control of requirements and appro
 
 ### Stage 1: Classify
 
-**Agent**: Orchestrator (self)
-**Action**: Analyze request and determine complexity
+**Actor**: Human
+**Action**: Analyse request and determine complexity
 **Inputs**: User request
 **Outputs**: Complexity classification, workflow strategy
 **Success Criteria**: Complexity is one of: simple, moderate, complex
 
 ### Stage 2: Explore
 
-**Agent**: @Explorer
+**Command**: `/explore`
+**Agent**: Explorer
 **Action**: Investigate codebase for context
 **Inputs**: User request, complexity classification
 **Outputs**: Exploration report
@@ -41,16 +43,17 @@ approval gates ensure the developer remains in control of requirements and appro
 
 ### Stage 3: Human Approval — Solution Direction
 
-**Agent**: Orchestrator (self)
-**Action**: Present exploration findings and proposed direction to user
+**Actor**: Human
+**Action**: Review exploration findings and proposed direction
 **Inputs**: Exploration report
-**Outputs**: User approval to proceed
+**Outputs**: Approval to proceed
 **Success Criteria**: User explicitly approves the solution direction
 **Gate**: Human approval received
 
 ### Stage 4: Plan
 
-**Agent**: @Planner
+**Command**: `/plan`
+**Agent**: Planner
 **Action**: Break work into phases and atomic task specifications
 **Inputs**: User request, exploration report, approved direction, complexity
 **Outputs**: Phase breakdown, atomic task specs, task briefs, do-not-touch list
@@ -65,16 +68,17 @@ approval gates ensure the developer remains in control of requirements and appro
 
 ### Stage 5: Human Approval — Implementation Plan
 
-**Agent**: Orchestrator (self)
-**Action**: Present plan to user for review
+**Actor**: Human
+**Action**: Review plan
 **Inputs**: Phase breakdown, task specifications, do-not-touch list
-**Outputs**: User approval to proceed
+**Outputs**: Approval to proceed
 **Success Criteria**: User explicitly approves the plan
 **Gate**: Human approval received
 
 ### Stage 6: Code (per task)
 
-**Agent**: @Coder
+**Command**: `/code`
+**Agent**: Coder
 **Action**: Implement the current atomic task
 **Inputs**: Task specification, task brief, do-not-touch list, patterns
 **Outputs**: Changed files, implementation report
@@ -88,7 +92,8 @@ approval gates ensure the developer remains in control of requirements and appro
 
 ### Stage 7: Verify (per task)
 
-**Agent**: @Verifier
+**Command**: `/verify`
+**Agent**: Verifier
 **Action**: Validate task through four verification layers
 **Inputs**: Task spec (acceptance criteria, definition of done, risk level), changes
 **Outputs**: Verification report with layered results and status
@@ -105,7 +110,8 @@ approval gates ensure the developer remains in control of requirements and appro
 
 ### Stage 8: Commit (per task)
 
-**Agent**: Orchestrator (self)
+**Command**: `/commit-epcv`
+**Agent**: Coder
 **Action**: Commit verified changes as a self-contained unit
 **Inputs**: Verified changes for current task
 **Outputs**: Git commit
@@ -113,40 +119,32 @@ approval gates ensure the developer remains in control of requirements and appro
 
 ### Stage 9: Task Loop
 
-**Agent**: Orchestrator (self)
+**Actor**: Human
 **Action**: Check for remaining tasks in current phase
 **Decision**:
 
-- More tasks → return to Stage 6 (Code) with next task
+- More tasks → return to Stage 6 (`/code`) with next task
 - No more tasks → proceed to Stage 10 (Phase Loop)
 
 ### Stage 10: Phase Loop
 
-**Agent**: Orchestrator (self)
+**Actor**: Human
 **Action**: Check for remaining phases in the plan
 **Decision**:
 
-- More phases → return to Stage 4 (Plan) to detail next phase's tasks
-- No more phases → proceed to Stage 11 (Deliver)
-
-### Stage 11: Deliver
-
-**Agent**: Orchestrator (self)
-**Action**: Present complete results to user
-**Inputs**: All phase reports, task reports, verification reports
-**Outputs**: EPCV summary
-**Success Criteria**: User receives complete summary with all changes by task
+- More phases → return to Stage 4 (`/plan`) to detail next phase's tasks
+- No more phases → Done
 
 ## Error Handling
 
 - **Exploration fails**: Ask user for clarification at approval gate
-- **User rejects direction**: Return to Explore or modify per user input
+- **User rejects direction**: Re-run `/explore` or modify per user input
 - **Planning blocked**: Surface blocker to user at plan approval gate
 - **User rejects plan**: Modify plan or re-explore per user direction
 - **Coding deviation**: Document and continue if safe
-- **Verification FAIL**: Retry with Coder (max 2 per task)
-- **Bug-fixing loop**: Stop patching, return to Explore for new evidence
-- **Retries exhausted**: Escalate to user with full context
+- **Verification FAIL**: Re-run `/code` with fix instructions (max 2 per task)
+- **Bug-fixing loop**: Stop patching, re-run `/explore` for new evidence
+- **Retries exhausted**: User reviews full context and decides next steps
 
 ## Estimated Duration
 

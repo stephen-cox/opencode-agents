@@ -40,9 +40,9 @@
 When verification fails for an atomic task:
 
 1. Verifier produces specific fix instructions referencing the failing acceptance criteria
-2. Orchestrator routes back to Coder with fix instructions
+2. Human re-runs `/code` with fix instructions from the Verifier
 3. Coder implements fixes (reads files again first, checks do-not-touch list)
-4. Orchestrator routes back to Verifier
+4. Human re-runs `/verify` to validate the fix
 5. Maximum 2 retries per task before bug-fixing loop escape
 
 ### Bug-Fixing Loop Escape

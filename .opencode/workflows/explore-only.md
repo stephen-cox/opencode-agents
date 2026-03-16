@@ -15,7 +15,7 @@ without making changes. Useful for research, onboarding, or pre-planning.
 
 ### Stage 1: Scope
 
-**Agent**: Orchestrator (self)
+**Actor**: Human
 **Action**: Determine what to explore and how thoroughly
 **Inputs**: User's exploration request
 **Outputs**: Exploration scope and thoroughness level
@@ -23,7 +23,8 @@ without making changes. Useful for research, onboarding, or pre-planning.
 
 ### Stage 2: Explore
 
-**Agent**: @explorer
+**Command**: `/explore`
+**Agent**: Explorer
 **Action**: Investigate codebase per scope
 **Inputs**: Exploration scope, thoroughness level
 **Outputs**: Exploration report (files, patterns, dependencies, risks, open questions)
@@ -36,12 +37,12 @@ without making changes. Useful for research, onboarding, or pre-planning.
 - Open questions flagged
 - Findings clearly organised
 
-### Stage 3: Deliver
+### Stage 3: Review
 
-**Agent**: Orchestrator (self)
-**Action**: Present exploration findings
+**Actor**: Human
+**Action**: Review exploration findings
 **Inputs**: Exploration report
-**Outputs**: Formatted findings for user
+**Outputs**: Understanding of the codebase area
 
 No human approval gate is needed since no changes are being made.
 

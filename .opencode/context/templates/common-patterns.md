@@ -1,37 +1,38 @@
 # Common Patterns
 
-## Routing Pattern
+## Command Routing Pattern
 
-All subagent routing uses the @ symbol convention:
+Each command routes directly to a specialised agent:
 
-- `@explorer` — Route to exploration phase
-- `@planner` — Route to planning phase
-- `@coder` — Route to coding phase (per atomic task)
-- `@verifier` — Route to verification phase (per atomic task)
+- `/explore` → Explorer agent (read-only investigation)
+- `/plan` → Planner agent (solution design, atomic task specs)
+- `/code` → Coder agent (implementation per atomic task)
+- `/verify` → Verifier agent (4-layer verification per atomic task)
+- `/commit-epcv` → Coder agent (commit verified changes)
 
 ## Context Passing Pattern
 
-Each phase receives filtered context relevant to its role:
+The human provides context from prior phases when invoking each command.
+Context flows through the conversation:
 
 ```text
-Orchestrator → Explorer:
+/explore:
   - user_request
   - complexity_classification
-  - known_affected_areas
 
-Orchestrator → Planner:
+/plan:
   - user_request
-  - exploration_report
+  - exploration_report (from prior /explore)
   - complexity_classification
-  - approved_solution_direction (from human gate)
+  - approved_solution_direction (human decision)
 
-Orchestrator → Coder (per task):
+/code (per task):
   - task_specification (scope, non-goals, acceptance criteria, definition of done, tests, rollback, risk)
   - task_brief (scope, constraints, files, assumptions, patterns)
   - do_not_touch_list
   - patterns_to_follow
 
-Orchestrator → Verifier (per task):
+/verify (per task):
   - task_specification (acceptance criteria, definition of done, risk level)
   - changes_made
   - manual_test_steps
@@ -43,47 +44,47 @@ Orchestrator → Verifier (per task):
 Two mandatory approval points in every EPCV workflow:
 
 ```text
-Explore → [Present findings + proposed direction] → Human approves → Plan
-Plan    → [Present tasks + do-not-touch list]     → Human approves → Code
+/explore → [Review findings + proposed direction] → Human approves → /plan
+/plan    → [Review tasks + do-not-touch list]     → Human approves → /code
 ```
 
 For simple tasks, present concise summaries. For moderate/complex, present full reports.
 
 The user may:
 
-- **Approve** → proceed to next stage
+- **Approve** → proceed to next command
 - **Request modifications** → adjust and re-present
-- **Reject** → return to Explore or modify approach per user direction
+- **Reject** → re-run `/explore` or modify approach
 
 ## Iterative Loop Pattern
 
-The workflow runs as nested loops:
+The workflow runs as nested loops driven by the human:
 
 ```text
 For each phase:
-  Plan → phase (detail atomic tasks)
+  /plan → phase (detail atomic tasks)
   Human approves → plan
   For each task in → phase:
-    Code → task
-    Verify → task (4 layers)
-    Commit → task
+    /code → task
+    /verify → task (4 layers)
+    /commit-epcv → task
   End task loop
 End phase loop
-Deliver
+Done
 ```
 
 ## Retry and Bug-Fixing Loop Escape Pattern
 
 ```text
-Verify FAIL
-  → Coder (fix instructions from Verifier, retry 1)
-  → Verify
-    FAIL → Coder (retry 2)
-    → Verify
+/verify FAIL
+  → /code (fix instructions from Verifier, retry 1)
+  → /verify
+    FAIL → /code (retry 2)
+    → /verify
       FAIL → Bug-fixing loop escape
-             (stop patching, return to Explore for new evidence)
-             → Re-plan → Code → Verify
-               FAIL → Escalate to user
+             (stop patching, /explore for new evidence)
+             → Re-plan → /code → /verify
+               FAIL → Escalate (human decides next steps)
 ```
 
 Same-file detection: if the same file has been patched 3+ times for the same
@@ -94,8 +95,8 @@ issue, trigger bug-fixing loop escape immediately (don't wait for retry limit).
 Every stage transition checks a gate:
 
 ```text
-Explore ──gate──▶ Human Approval ──gate──▶ Plan ──gate──▶ Human Approval
-    ──gate──▶ Code ──gate──▶ Verify ──gate──▶ Commit ──gate──▶ Task Loop
+/explore ──gate──▶ Human Approval ──gate──▶ /plan ──gate──▶ Human Approval
+    ──gate──▶ /code ──gate──▶ /verify ──gate──▶ /commit-epcv ──gate──▶ Task Loop
 ```
 
 Gates check specific criteria (see `standards/validation-rules.md`).
@@ -181,7 +182,7 @@ Tasks within a phase are ordered by dependency:
 Each phase scales its thoroughness:
 
 ```text
-Simple:   Quick explore → Concise approval → Brief plan → Concise approval → Code/Verify/Commit
-Moderate: Full explore  → Full approval    → Detailed plan → Full approval → Code/Verify/Commit per task
-Complex:  Deep explore  → Full approval    → Architecture plan → Full approval → Multi-phase Code/Verify/Commit
+Simple:   Quick /explore → Concise review → Brief /plan → Concise review → /code → /verify → /commit-epcv
+Moderate: Full /explore  → Full review    → Detailed /plan → Full review → /code → /verify → /commit-epcv per task
+Complex:  Deep /explore  → Full review    → Architecture /plan → Full review → Multi-phase /code → /verify → /commit-epcv
 ```
