@@ -186,3 +186,35 @@ Simple:   Quick /explore → Concise review → Brief /plan → Concise review �
 Moderate: Full /explore  → Full review    → Detailed /plan → Full review → /code → /verify → /commit-epcv per task
 Complex:  Deep /explore  → Full review    → Architecture /plan → Full review → Multi-phase /code → /verify → /commit-epcv
 ```
+
+## Backlog.md Integration Pattern
+
+Each agent documents its work in Backlog.md via MCP tools, creating a persistent
+record of decisions, tasks, progress, and outcomes:
+
+```text
+Explorer  → document_create    (exploration findings as a Backlog document)
+Planner   → task_create        (atomic tasks with acceptance criteria)
+          → milestone_add      (phases as milestones, if multi-phase)
+          → task_edit planSet   (record task briefs on each task)
+Coder     → task_edit status   (mark "In Progress")
+          → task_edit notesAppend (implementation decisions, deviations, issues)
+Verifier  → task_edit acceptanceCriteriaCheck (mark passing criteria)
+          → task_edit finalSummary + status "Done" (on PASS)
+          → task_edit notesAppend (failure details on FAIL, leave In Progress)
+```
+
+### Key Rules
+
+- **Explorer uses documents, not tasks** — Exploration findings are reference
+  material, not commitments. Use `document_create` for the exploration report.
+- **Planner creates tasks** — Each atomic task spec becomes a Backlog task.
+  Write descriptions as work orders for strangers (include all context).
+- **Coder claims and annotates** — Set status to "In Progress" before coding,
+  append notes after implementation.
+- **Verifier finalises or records failure** — Check acceptance criteria on PASS,
+  append fix instructions on FAIL. Never set status to "Done" on FAIL.
+- **Search before creating** — Always use `task_search` or `document_search`
+  before creating to avoid duplicates.
+- **Never edit Backlog markdown files directly** — Always use MCP tools so
+  relationships, metadata, and history stay consistent.

@@ -114,6 +114,34 @@ Determine the final status:
 
 For FAIL status, provide specific fix instructions for the Coder.
 
+### Step 9: Update Task in Backlog
+
+After producing the verification report, update the Backlog task to reflect
+the outcome:
+
+1. **Find the task** — Use `task_search` or `task_list` to locate the Backlog
+   task (the Coder should have left it in "In Progress" status)
+
+2. **On PASS or PASS_WITH_WARNINGS**:
+   - **Check acceptance criteria** — Use `task_edit` with `acceptanceCriteriaCheck`
+     to mark each passing criterion by its 1-based index
+   - **Check definition of done items** — Use `task_edit` with `definitionOfDoneCheck`
+     to mark each completed item
+   - **Write the final summary** — Use `task_edit` with `finalSummary` to capture
+     a PR-style summary: what changed, verification results, warnings (if any),
+     and any follow-up recommendations
+   - **Set status to Done** — Use `task_edit` with status "Done"
+
+3. **On FAIL**:
+   - **Uncheck failing criteria** — Use `task_edit` with `acceptanceCriteriaUncheck`
+     for any criteria that were previously checked but now fail
+   - **Append failure details** — Use `task_edit` with `notesAppend` to record:
+     - Which verification layers failed and why
+     - Specific fix instructions for the Coder
+     - Which acceptance criteria are not met (with evidence)
+   - **Leave status as In Progress** — The task stays in progress for the Coder
+     to retry with the fix instructions
+
 ## Output Format
 
 ```text

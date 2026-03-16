@@ -95,6 +95,33 @@ Sequence the tasks within the current phase:
 
 Each task must be independently valid (no broken intermediate states). Each task produces a self-contained, committable change.
 
+### Step 7: Create Tasks in Backlog
+
+After producing the plan and getting human approval, persist each atomic task
+in Backlog so progress can be tracked across the workflow.
+
+1. **Search for existing tasks** — Use `task_search` to check if tasks for this
+   work already exist (avoid duplicates)
+2. **Create a parent task** (if multi-task) — Use `task_create` for the overall
+   feature/change. Include the solution design summary in the description.
+3. **Create subtasks** for each atomic task — Use `task_create` with:
+   - **Title**: The atomic task title
+   - **Description**: Scope, non-goals, and context from the task brief. Write
+     the description as a work order for a stranger — include all context needed
+     to implement without prior conversation knowledge.
+   - **Acceptance criteria**: The testable conditions from the task specification
+   - **Priority**: Mapped from risk level (high risk → high priority)
+   - **Parent task ID**: Link to the parent task if one was created
+   - **Dependencies**: Reference any tasks that must complete first
+   - **References**: Include the exploration document ID from the Explorer
+     (e.g. the Backlog document path or ID)
+4. **Create milestones** for phases (if multi-phase) — Use `milestone_add` for
+   each phase, then set the milestone on each task with `task_edit`
+5. **Record the plan** — Use `task_edit` with `planSet` on each task to capture
+   the task brief (scope, constraints, files, assumptions, patterns)
+6. **Report created task IDs** — Include the Backlog task IDs in the plan output
+   so the Coder and Verifier can reference them
+
 ## Output Format
 
 ```text

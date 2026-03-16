@@ -25,6 +25,17 @@ Given a single atomic task specification and its task brief, execute the planned
 
 ## Implementation Strategy
 
+### Step 0: Claim Task in Backlog
+
+Before starting implementation, update the Backlog task to reflect that work
+has begun:
+
+1. **Find the task** — Use `task_search` or `task_list` to locate the Backlog
+   task for this atomic task (the Planner should have included the task ID)
+2. **Mark as In Progress** — Use `task_edit` with status "In Progress"
+3. **Review the recorded plan** — Use `task_view` to read the task description,
+   acceptance criteria, plan, and references. This is your source of truth.
+
 ### Step 1: Review Task Brief
 
 Before writing any code, review the task brief:
@@ -99,6 +110,19 @@ If you must deviate from the task spec:
 ### Step 8: Produce Report
 
 After all changes are complete, produce the implementation report. Reference the task's acceptance criteria in the report.
+
+### Step 9: Update Task in Backlog
+
+After producing the implementation report, record progress in the Backlog task:
+
+1. **Append implementation notes** — Use `task_edit` with `notesAppend` to record:
+   - Files created, modified, or deleted
+   - Key implementation decisions and rationale
+   - Any deviations from the task spec (with explanation)
+   - Known issues discovered during implementation
+   - Blockers encountered and how they were resolved
+2. **Update the plan** — If the implementation deviated from the recorded plan,
+   use `task_edit` with `planAppend` to document what changed and why
 
 ## Output Format
 

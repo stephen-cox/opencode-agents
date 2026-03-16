@@ -32,12 +32,13 @@ orchestrator agent — the human performs all coordination tasks:
 - Flag risks and concerns
 - Produce structured exploration report
 - Flag open questions for the human approval gate
+- Document findings in Backlog (`document_create`) for reference by later phases
 
 **Triggers**: `/explore` command
 
 **Receives**: User request, complexity context
 
-**Produces**: Exploration report (files, patterns, dependencies, risks, open questions)
+**Produces**: Exploration report (files, patterns, dependencies, risks, open questions), Backlog document ID
 
 ---
 
@@ -57,12 +58,14 @@ orchestrator agent — the human performs all coordination tasks:
 - Define do-not-touch list and dependency guardrails
 - Document architecture decisions (moderate/complex)
 - Scale planning depth by complexity
+- Create Backlog tasks from atomic task specs (`task_create`) with acceptance criteria
+- Create milestones for phases (`milestone_add`) and record plans on tasks (`task_edit`)
 
 **Triggers**: `/plan` command (after human approval of solution direction)
 
 **Receives**: User request, exploration report, approved direction, complexity
 
-**Produces**: Phase breakdown, atomic task specs, task briefs, do-not-touch list
+**Produces**: Phase breakdown, atomic task specs, task briefs, do-not-touch list, Backlog task IDs
 
 ---
 
@@ -82,10 +85,11 @@ orchestrator agent — the human performs all coordination tasks:
 - Document any deviations from the task spec
 - Detect bug-fixing loops (same file patched 3+ times for same issue)
 - Report implementation status with acceptance criteria status
+- Claim Backlog task (`task_edit` status "In Progress") and append implementation notes (`notesAppend`)
 
 **Triggers**: `/code` command (per atomic task within a phase)
 
-**Receives**: Task specification, task brief, do-not-touch list, patterns to follow
+**Receives**: Task specification, task brief, do-not-touch list, patterns to follow, Backlog task ID
 
 **Produces**: Changed files, implementation report with acceptance criteria status
 
@@ -107,10 +111,12 @@ orchestrator agent — the human performs all coordination tasks:
 - Check definition of done (complete/incomplete per item)
 - Produce PASS / FAIL / PASS_WITH_WARNINGS verdict
 - Provide specific fix instructions on FAIL
+- Update Backlog task: check acceptance criteria (`acceptanceCriteriaCheck`), write final summary
+  on PASS (`finalSummary`, status "Done"), or append failure details on FAIL (`notesAppend`)
 
 **Triggers**: `/verify` command (per atomic task after Coder completes)
 
-**Receives**: Task spec (acceptance criteria, definition of done, risk level), changes made, manual test steps
+**Receives**: Task spec (acceptance criteria, definition of done, risk level), changes made, manual test steps, Backlog task ID
 
 **Produces**: Verification report with layered results, acceptance criteria results, definition of done results, status
 

@@ -85,6 +85,19 @@ Flag potential issues:
 
 Compile findings into a structured exploration report.
 
+### Step 7: Document Findings in Backlog
+
+After producing the exploration report, persist it as a Backlog document so it
+can be referenced by tasks created during planning.
+
+1. **Search for existing documents** — Use `document_search` to check if a document
+   for this request already exists (avoid duplicates)
+2. **Create a Backlog document** — Use `document_create` with:
+   - **Title**: A concise description of the exploration (e.g. "Exploration: Add input validation to signup form")
+   - **Content**: The full exploration report (files found, patterns, dependencies, risks, open questions)
+3. **Report the document ID** — Include the document ID in the exploration report
+   output so the Planner can reference it when creating tasks
+
 ## Output Format
 
 ```text
