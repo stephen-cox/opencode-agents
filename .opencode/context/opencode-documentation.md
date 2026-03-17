@@ -124,12 +124,12 @@ When working on OpenCode-related features, **always consult the relevant documen
 
 ### Documentation File Paths
 
-All documentation files are located at: `/home/stephen/Syncthing/Dev/opencode-agents/docs/`
+All documentation files are located at: `docs/`
 
 Example: To read the agents documentation, use:
 
 ```txt
-Read: /home/stephen/Syncthing/Dev/opencode-agents/docs/agents.mdx
+Read: docs/agents.mdx
 ```
 
 ---
