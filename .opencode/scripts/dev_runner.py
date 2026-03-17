@@ -46,8 +46,8 @@ class Config:
     model: str = "zai-coding-plan/glm-5"
     coder_model: Optional[str] = None
     verifier_model: Optional[str] = None
-    coder_agent: Optional[str] = None
-    verifier_agent: Optional[str] = None
+    coder_agent: str = "coder"
+    verifier_agent: str = "verifier"
     task_timeout: int = 1800  # max seconds to wait for a task to complete
     poll_interval: int = 10  # seconds between polling checks
     stall_timeout: int = 120  # seconds with no activity before declaring a stall
@@ -1053,11 +1053,13 @@ Examples:
     )
     parser.add_argument(
         "--coder-agent",
-        help="Agent name for coder sessions",
+        default="coder",
+        help="Agent name for coder sessions (default: coder)",
     )
     parser.add_argument(
         "--verifier-agent",
-        help="Agent name for verifier sessions",
+        default="verifier",
+        help="Agent name for verifier sessions (default: verifier)",
     )
     parser.add_argument(
         "--task-timeout",
