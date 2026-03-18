@@ -827,10 +827,15 @@ These were identified as gaps during previous review and are now required:
 - Follow patterns and conventions already in the codebase
 - Run tests after your changes to confirm nothing is broken
 - If acceptance criteria are ambiguous, implement the most reasonable interpretation
-- Record implementation notes in Backlog when done using MCP tools
+- Do not update the Backlog tasks acceptance criteria or definition of done
+- Do not git commit the changes
+- Do not try to access or create files outside of the project directory
+- Create any temporary files in the project directory and delete once done
 
 ## When You Are Finished
-Run all tests and linting. Provide a summary of what you changed and why.
+ - Run all tests and linting. 
+ - Provide a summary of what you changed and why.
+ - Record implementation notes in Backlog when done using MCP tools
 """
     return prompt
 
