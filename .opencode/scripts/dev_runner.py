@@ -50,7 +50,7 @@ class Config:
     verifier_agent: str = "verifier"
     task_timeout: int = 1800  # max seconds to wait for a task to complete
     poll_interval: int = 10  # seconds between polling checks
-    stall_timeout: int = 120  # seconds with no activity before declaring a stall
+    stall_timeout: int = 300  # seconds with no activity before declaring a stall
     log_level: str = "INFO"
 
     @classmethod
@@ -153,30 +153,73 @@ def run_backlog(config: Config, *args: str) -> str:
     return result.stdout.strip()
 
 
-def get_milestone_tasks(config: Config) -> list[Task]:
-    """List To Do tasks for a milestone label."""
-    stdout = run_backlog(
-        config, "task", "list", "-m", config.milestone, "-s", "To Do", "--plain"
-    )
+def _parse_frontmatter(text: str) -> dict:
+    """Parse YAML frontmatter from a markdown file's text.
 
-    if not stdout:
+    Returns a dict of the frontmatter fields.  Falls back to a simple
+    line-by-line parser so that ``pyyaml`` is not required.
+    """
+    m = re.match(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
+    if not m:
+        return {}
+    block = m.group(1)
+    try:
+        import yaml
+
+        return yaml.safe_load(block) or {}
+    except ImportError:
+        pass
+    # Simple fallback: handles ``key: value`` and ``key: "value"``
+    result: dict = {}
+    for line in block.splitlines():
+        kv = re.match(r"^(\w[\w-]*)\s*:\s*(.*)", line)
+        if kv:
+            key = kv.group(1)
+            val = kv.group(2).strip().strip('"').strip("'")
+            result[key] = val
+    return result
+
+
+def get_milestone_tasks(config: Config) -> list[Task]:
+    """List To Do tasks for a milestone by reading task files directly.
+
+    The backlog CLI ``task list`` does not support milestone filtering,
+    so we read the markdown files in ``backlog/tasks/`` and match the
+    ``milestone`` frontmatter field.
+    """
+    tasks_dir = Path(config.project_dir) / "backlog" / "tasks"
+    if not tasks_dir.is_dir():
+        log.warning(f"Tasks directory not found: {tasks_dir}")
         return []
 
     tasks = []
-    for line in stdout.splitlines():
-        match = re.match(
-            r"\s*(?:\[\w+\]\s*)?(task-(\d+(?:\.\d+)?))\s*[-–—]\s*(.+?)(?:\s*\(|$)",
-            line,
-            re.IGNORECASE,
-        )
-        if match:
-            tasks.append(
-                Task(
-                    id=match.group(2),
-                    slug=match.group(1),
-                    title=match.group(3).strip(),
-                )
-            )
+    for md_file in sorted(tasks_dir.glob("task-*.md")):
+        try:
+            text = md_file.read_text(encoding="utf-8")
+        except OSError as e:
+            log.debug(f"Could not read {md_file}: {e}")
+            continue
+
+        fm = _parse_frontmatter(text)
+
+        # Filter: milestone must match AND status must be "To Do"
+        if (fm.get("milestone") or "").lower() != config.milestone.lower():
+            continue
+        if (fm.get("status") or "").lower() != "to do":
+            continue
+
+        task_id_raw = fm.get("id", "")
+        title = fm.get("title", md_file.stem)
+
+        # Extract numeric portion from ID (e.g. "TASK-003" -> "003")
+        id_match = re.match(r"(?:task-?)?([\d]+(?:\.[\d]+)?)", task_id_raw, re.IGNORECASE)
+        if id_match:
+            numeric_id = id_match.group(1)
+        else:
+            numeric_id = task_id_raw
+
+        slug = f"task-{numeric_id}" if numeric_id else md_file.stem
+        tasks.append(Task(id=numeric_id, slug=slug, title=title))
 
     return tasks
 
@@ -279,29 +322,200 @@ def create_session(config: Config, title: str) -> str:
     return session_id
 
 
-def _post_message_blocking(
+def _send_message_async(
     config: Config,
     session_id: str,
     body: dict,
-    result_holder: dict,
 ) -> None:
-    """POST a message (blocks until OpenCode finishes). Runs in a thread."""
-    try:
-        r = requests.post(
-            f"{config.opencode_url}/session/{session_id}/message",
-            json=body,
-            timeout=config.task_timeout + 60,  # generous socket timeout
+    """Send a message asynchronously (returns immediately, no response body)."""
+    r = requests.post(
+        f"{config.opencode_url}/session/{session_id}/prompt_async",
+        json=body,
+        timeout=30,
+    )
+    if not r.ok:
+        raise RuntimeError(
+            f"prompt_async failed ({r.status_code}): {r.text[:500]}"
         )
-        if not r.ok:
-            result_holder["error"] = (
-                f"OpenCode API error ({r.status_code}): {r.text[:500]}"
-            )
-        else:
-            result_holder["response"] = r.json()
-    except requests.exceptions.Timeout:
-        result_holder["error"] = "HTTP request timed out"
-    except Exception as e:
-        result_holder["error"] = str(e)
+
+
+def _abort_session(config: Config, session_id: str) -> None:
+    """Abort a running session."""
+    try:
+        requests.post(
+            f"{config.opencode_url}/session/{session_id}/abort",
+            timeout=15,
+        )
+    except Exception:
+        pass  # best-effort
+
+
+def _get_session_status(config: Config, session_id: str) -> Optional[str]:
+    """Get the session's current status type ('busy', 'idle', 'retry')."""
+    try:
+        r = requests.get(
+            f"{config.opencode_url}/session/status",
+            timeout=15,
+        )
+        if r.ok:
+            statuses = r.json()
+            status = statuses.get(session_id, {})
+            return status.get("type")
+        return None
+    except Exception:
+        return None
+
+
+class _SSEActivityMonitor:
+    """Monitors an SSE event stream for session activity.
+
+    Connects to the OpenCode /event SSE endpoint and watches for events
+    related to a specific session. Any matching event resets the activity
+    timer, eliminating false-positive stall detection.
+    """
+
+    # Event types that indicate the session is active.  For events whose
+    # session ID lives inside ``properties.info.id`` rather than
+    # ``properties.sessionID``, we handle both paths in ``_extract_session_id``.
+    _ACTIVITY_EVENTS = frozenset({
+        "session.updated",
+        "session.status",
+        "message.updated",
+        "message.part.updated",
+        "todo.updated",
+    })
+    # Terminal events — the session has finished (successfully or not).
+    _TERMINAL_EVENTS = frozenset({
+        "session.idle",
+        "session.error",
+    })
+
+    def __init__(self, config: Config, session_id: str) -> None:
+        self._config = config
+        self._session_id = session_id
+
+        self._last_activity = time.time()
+        self._terminal_event: Optional[dict] = None  # set on idle/error
+        self._connected = False
+        self._stopped = False
+        self._lock = threading.Lock()
+
+        self._thread = threading.Thread(
+            target=self._run, daemon=True, name="sse-monitor"
+        )
+        self._thread.start()
+
+    # -- public API -----------------------------------------------------------
+
+    def last_activity(self) -> float:
+        """Wall-clock time of the most recent activity (``time.time()``)."""
+        with self._lock:
+            return self._last_activity
+
+    def touch(self) -> None:
+        """Manually record activity (e.g. from a polling fallback)."""
+        with self._lock:
+            self._last_activity = time.time()
+
+    def terminal_event(self) -> Optional[dict]:
+        """Return the terminal event if one has been received, else None."""
+        with self._lock:
+            return self._terminal_event
+
+    def is_connected(self) -> bool:
+        with self._lock:
+            return self._connected
+
+    def stop(self) -> None:
+        self._stopped = True
+
+    # -- internals ------------------------------------------------------------
+
+    @staticmethod
+    def _extract_session_id(event: dict) -> Optional[str]:
+        props = event.get("properties", {})
+        # Most events: properties.sessionID
+        sid = props.get("sessionID")
+        if sid:
+            return sid
+        # session.updated / session.created / session.deleted: properties.info.id
+        info = props.get("info")
+        if isinstance(info, dict):
+            return info.get("id")
+        # message.part.updated carries part.sessionID in some versions
+        part = props.get("part")
+        if isinstance(part, dict):
+            return part.get("sessionID")
+        return None
+
+    def _run(self) -> None:
+        """Background thread: connect to SSE and process events."""
+        while not self._stopped:
+            try:
+                self._stream_events()
+            except Exception as exc:
+                with self._lock:
+                    self._connected = False
+                if self._stopped:
+                    return
+                log.debug(f"  SSE stream error: {exc}, reconnecting in 5s")
+                time.sleep(5)
+
+    def _stream_events(self) -> None:
+        r = requests.get(
+            f"{self._config.opencode_url}/event",
+            stream=True,
+            timeout=(15, None),  # 15s connect, no read timeout
+            headers={"Accept": "text/event-stream"},
+        )
+        r.raise_for_status()
+
+        with self._lock:
+            self._connected = True
+
+        data_buf: list[str] = []
+
+        for raw_line in r.iter_lines(decode_unicode=True):
+            if self._stopped:
+                r.close()
+                return
+
+            if raw_line is None:
+                continue
+
+            line = raw_line  # already decoded
+
+            if line.startswith("data:"):
+                data_buf.append(line[5:].strip())
+            elif line == "":
+                # End of SSE event frame — process accumulated data lines
+                if data_buf:
+                    payload_str = "\n".join(data_buf)
+                    data_buf.clear()
+                    try:
+                        event = json.loads(payload_str)
+                    except (json.JSONDecodeError, ValueError):
+                        continue
+                    self._handle_event(event)
+            # Ignore other SSE fields (event:, id:, retry:, comments)
+
+    def _handle_event(self, event: dict) -> None:
+        etype = event.get("type", "")
+        sid = self._extract_session_id(event)
+
+        if sid != self._session_id:
+            return
+
+        if etype in self._ACTIVITY_EVENTS:
+            with self._lock:
+                self._last_activity = time.time()
+            log.debug(f"  SSE activity: {etype}")
+
+        if etype in self._TERMINAL_EVENTS:
+            with self._lock:
+                self._last_activity = time.time()
+                self._terminal_event = event
+            log.debug(f"  SSE terminal: {etype}")
 
 
 def _get_last_assistant_message(config: Config, session_id: str) -> Optional[dict]:
@@ -346,7 +560,15 @@ def send_message(
     model: Optional[str] = None,
     agent: Optional[str] = None,
 ) -> dict:
-    """Send a message and poll for completion instead of blocking."""
+    """Send a message asynchronously and wait for completion.
+
+    Uses the ``prompt_async`` endpoint (returns immediately) combined with
+    an SSE event stream listener for real-time activity detection.  Falls
+    back to polling ``GET /session/:id`` and ``GET /session/status`` when
+    SSE is unavailable.  This eliminates false-positive stall detection
+    that occurred with the previous approach of only watching
+    ``session.time.updated``.
+    """
     body: dict = {
         "parts": [{"type": "text", "text": prompt}],
     }
@@ -359,81 +581,118 @@ def send_message(
     if agent:
         body["agent"] = agent
 
-    # Fire the blocking POST in a background thread
-    result_holder: dict = {}
-    thread = threading.Thread(
-        target=_post_message_blocking,
-        args=(config, session_id, body, result_holder),
-        daemon=True,
-    )
-    thread.start()
+    log.debug(f"  send_message: session={session_id}, agent={agent}, model={model}")
+
+    # Start SSE activity monitor before sending the message so we don't
+    # miss early events.
+    sse = _SSEActivityMonitor(config, session_id)
+
+    try:
+        # Fire the async prompt (returns 204 immediately).
+        _send_message_async(config, session_id, body)
+    except Exception:
+        sse.stop()
+        raise
 
     # Poll for completion
     start_time = time.time()
-    last_activity_time = start_time
-    last_updated_ts: Optional[int] = None
     last_log_time = start_time
+    last_updated_ts: Optional[int] = None
 
-    while True:
-        elapsed = time.time() - start_time
+    try:
+        while True:
+            elapsed = time.time() - start_time
 
-        # Check if the thread finished (POST returned)
-        if not thread.is_alive():
-            if "error" in result_holder:
-                raise RuntimeError(result_holder["error"])
-            return result_holder.get("response", {})
+            # -- Terminal SSE event (session.idle or session.error) ---------
+            terminal = sse.terminal_event()
+            if terminal:
+                etype = terminal.get("type", "")
+                if etype == "session.error":
+                    props = terminal.get("properties", {})
+                    err = props.get("error", {})
+                    err_name = err.get("name", "UnknownError")
+                    err_msg = err.get("data", {}).get("message", "unknown")
+                    raise RuntimeError(
+                        f"Session error ({err_name}): {err_msg}"
+                    )
+                # session.idle — fetch the assistant response
+                assistant_msg = _get_last_assistant_message(config, session_id)
+                if assistant_msg:
+                    finish = assistant_msg.get("info", {}).get("finish", "")
+                    parts_count = len(assistant_msg.get("parts", []))
+                    log.info(
+                        f"  Complete via SSE idle (finish={finish!r}) "
+                        f"after {elapsed:.0f}s, {parts_count} parts"
+                    )
+                    return assistant_msg
+                # Idle but no assistant message yet — keep polling briefly
+                log.debug("  SSE idle received but no assistant message yet")
 
-        # Check overall timeout
-        if elapsed > config.task_timeout:
-            log.error(
-                f"  Task timeout ({config.task_timeout}s) exceeded after {elapsed:.0f}s"
-            )
-            raise TimeoutError(f"Task did not complete within {config.task_timeout}s")
-
-        # Poll session updated timestamp for activity
-        current_updated = _get_session_updated(config, session_id)
-        if current_updated and current_updated != last_updated_ts:
-            last_updated_ts = current_updated
-            last_activity_time = time.time()
-
-        # Check for stall
-        stall_duration = time.time() - last_activity_time
-        if stall_duration > config.stall_timeout:
-            log.error(
-                f"  Session stalled — no activity for {stall_duration:.0f}s "
-                f"(threshold: {config.stall_timeout}s)"
-            )
-            raise TimeoutError(
-                f"Session stalled with no activity for {config.stall_timeout}s"
-            )
-
-        # Check assistant message for completion
-        assistant_msg = _get_last_assistant_message(config, session_id)
-        if assistant_msg:
-            finish = assistant_msg.get("info", {}).get("finish", "")
-            parts_count = len(assistant_msg.get("parts", []))
-            if finish:
-                log.info(
-                    f"  Polling: complete (finish={finish!r}) "
-                    f"after {elapsed:.0f}s, {parts_count} parts"
+            # -- Overall task timeout --------------------------------------
+            if elapsed > config.task_timeout:
+                log.error(
+                    f"  Task timeout ({config.task_timeout}s) exceeded "
+                    f"after {elapsed:.0f}s"
                 )
-                # Wait briefly for the thread to return the full response
-                thread.join(timeout=10)
-                if "response" in result_holder:
-                    return result_holder["response"]
-                # Thread didn't finish yet — use the polled message
-                return assistant_msg
+                _abort_session(config, session_id)
+                raise TimeoutError(
+                    f"Task did not complete within {config.task_timeout}s"
+                )
 
-        # Periodic progress log
-        if time.time() - last_log_time >= 30:
-            parts_info = ""
+            # -- Polling fallbacks for activity ----------------------------
+            # 1) Session updated timestamp (catches activity even if SSE
+            #    disconnected).
+            current_updated = _get_session_updated(config, session_id)
+            if current_updated and current_updated != last_updated_ts:
+                last_updated_ts = current_updated
+                sse.touch()  # reset activity timer
+
+            # 2) Session status — if the server says "busy", the session
+            #    is definitely still working.
+            status = _get_session_status(config, session_id)
+            if status == "busy":
+                sse.touch()
+
+            # -- Stall detection -------------------------------------------
+            stall_duration = time.time() - sse.last_activity()
+            if stall_duration > config.stall_timeout:
+                log.error(
+                    f"  Session stalled — no activity for {stall_duration:.0f}s "
+                    f"(threshold: {config.stall_timeout}s)"
+                )
+                _abort_session(config, session_id)
+                raise TimeoutError(
+                    f"Session stalled with no activity for "
+                    f"{config.stall_timeout}s"
+                )
+
+            # -- Message-level completion check ----------------------------
+            assistant_msg = _get_last_assistant_message(config, session_id)
             if assistant_msg:
+                finish = assistant_msg.get("info", {}).get("finish", "")
                 parts_count = len(assistant_msg.get("parts", []))
-                parts_info = f", {parts_count} parts so far"
-            log.info(f"  Polling: {elapsed:.0f}s elapsed{parts_info}")
-            last_log_time = time.time()
+                if finish:
+                    log.info(
+                        f"  Polling: complete (finish={finish!r}) "
+                        f"after {elapsed:.0f}s, {parts_count} parts"
+                    )
+                    return assistant_msg
 
-        time.sleep(config.poll_interval)
+            # -- Periodic progress log -------------------------------------
+            if time.time() - last_log_time >= 30:
+                parts_info = ""
+                if assistant_msg:
+                    parts_count = len(assistant_msg.get("parts", []))
+                    parts_info = f", {parts_count} parts so far"
+                sse_info = " (SSE)" if sse.is_connected() else " (polling)"
+                log.info(
+                    f"  Polling: {elapsed:.0f}s elapsed{parts_info}{sse_info}"
+                )
+                last_log_time = time.time()
+
+            time.sleep(config.poll_interval)
+    finally:
+        sse.stop()
 
 
 def get_session_diff(config: Config, session_id: str) -> str:
@@ -1076,8 +1335,8 @@ Examples:
     parser.add_argument(
         "--stall-timeout",
         type=int,
-        default=120,
-        help="Seconds with no session activity before declaring a stall (default: 120)",
+        default=300,
+        help="Seconds with no session activity before declaring a stall (default: 300)",
     )
     parser.add_argument(
         "--log-level",
