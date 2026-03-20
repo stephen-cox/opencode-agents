@@ -28,7 +28,7 @@ def run_claude_auth_status() -> bool:
     print("Checking Claude auth status...")
     try:
         result = subprocess.run(
-            ["claude", "auth", "status"],
+            ["claude", "--no-session-persistence", "--print", "'hello'"],
             capture_output=True,
             text=True,
             timeout=30,

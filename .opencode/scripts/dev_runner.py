@@ -98,6 +98,7 @@ class Task:
     plan: str = ""  # Task brief for coder (implementation plan)
     do_not_touch: list[str] = field(default_factory=list)  # Files/areas to avoid
     patterns: str = ""  # Coding patterns to follow
+    parent_task_id: Optional[str] = None  # Parent task ID for subtasks
 
 
 @dataclass
@@ -218,8 +219,41 @@ def get_milestone_tasks(config: Config) -> list[Task]:
         else:
             numeric_id = task_id_raw
 
+        # Read parent_task_id (normalise to numeric form like the task ID)
+        parent_raw = fm.get("parent_task_id", "") or ""
+        parent_id: Optional[str] = None
+        if parent_raw:
+            parent_match = re.match(
+                r"(?:task-?)?([\d]+(?:\.[\d]+)?)", parent_raw, re.IGNORECASE
+            )
+            parent_id = parent_match.group(1) if parent_match else parent_raw
+
         slug = f"task-{numeric_id}" if numeric_id else md_file.stem
-        tasks.append(Task(id=numeric_id, slug=slug, title=title))
+        tasks.append(
+            Task(id=numeric_id, slug=slug, title=title, parent_task_id=parent_id)
+        )
+
+    # Sort: subtasks before their parents.
+    # Build a set of parent IDs so we can identify parent tasks, then
+    # stable-sort with parents after their children.
+    parent_ids = {t.parent_task_id for t in tasks if t.parent_task_id}
+
+    def _sort_key(task: Task) -> tuple[int, str, str]:
+        """Subtasks (have a parent) sort before parents (are a parent).
+
+        Tasks that are neither a parent nor a subtask keep their
+        original relative order via the ID tiebreaker.
+        """
+        if task.parent_task_id:
+            # Subtask — sort first, grouped under its parent
+            return (0, task.parent_task_id, task.id)
+        if task.id in parent_ids:
+            # Parent — sort after its children
+            return (1, task.id, "")
+        # Standalone task — sort last
+        return (2, task.id, "")
+
+    tasks.sort(key=_sort_key)
 
     return tasks
 
@@ -1218,7 +1252,11 @@ def run_milestone(config: Config) -> list[TaskResult]:
         log.info(f"No To Do tasks found for milestone: {config.milestone}")
         return []
 
-    log.info(f"Found {len(tasks)} tasks to process\n")
+    log.info(f"Found {len(tasks)} tasks to process")
+    for i, task in enumerate(tasks, 1):
+        parent_info = f" (subtask of {task.parent_task_id})" if task.parent_task_id else ""
+        log.info(f"  {i}. {task.slug}: {task.title}{parent_info}")
+    log.info("")
 
     # Get full details for each task
     for i, task in enumerate(tasks):
@@ -1382,11 +1420,12 @@ def main():
         if not tasks:
             log.info("No To Do tasks found.")
             return
-        for task in tasks:
+        for i, task in enumerate(tasks, 1):
             task = get_task_details(config, task)
-            print(f"  {task.slug}: {task.title}")
-            print(f"    AC:  {len(task.acceptance_criteria)}")
-            print(f"    DoD: {len(task.definition_of_done)}")
+            parent_info = f" (subtask of {task.parent_task_id})" if task.parent_task_id else ""
+            print(f"  {i}. {task.slug}: {task.title}{parent_info}")
+            print(f"     AC:  {len(task.acceptance_criteria)}")
+            print(f"     DoD: {len(task.definition_of_done)}")
             print()
         return
 

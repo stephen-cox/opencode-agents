@@ -1,10 +1,25 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "default_agent": "GeneralCoder",
   "mcp": {
     "backlog": {
       "type": "local",
       "command": ["npx", "backlog", "mcp", "start"]
     }
   },
-  "plugin": ["opencode-anthropic-auth"]
+  "plugin": ["@thehugeman/opencode-anthropic-auth-community"],
+  "provider": {
+    "pythagoras": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (pythagoras)",
+      "options": {
+        "baseURL": "http:/192.168.0.11:11434/v1"
+      },
+      "models": {
+        "devstral-small-2": {
+          "name": "Devstral Small 2"
+        }
+      }
+    }
+  }
 }
