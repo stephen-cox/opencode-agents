@@ -128,8 +128,9 @@ After producing the implementation report, record progress in the Backlog task:
 
 **Do not**:
 
-1. Update the acceptance criteria\*\* — all changes need to be verified by the verifier agent first
+1. **Update the acceptance criteria** — all changes need to be verified by the verifier agent first
 2. Mark the task as done
+3. Git commit any changes
 
 ## Output Format
 

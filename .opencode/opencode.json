@@ -18,6 +18,9 @@
       "models": {
         "devstral-small-2": {
           "name": "Devstral Small 2"
+        },
+        "gpt-oss:20b": {
+          "name": "GPT OSS 20b"
         }
       }
     }
