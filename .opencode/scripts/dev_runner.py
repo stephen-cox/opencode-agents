@@ -1366,8 +1366,8 @@ Examples:
     parser.add_argument(
         "--task-timeout",
         type=int,
-        default=1800,
-        help="Max seconds to wait for a task to complete (default: 1800)",
+        default=3600,
+        help="Max seconds to wait for a task to complete (default: 3600)",
     )
     parser.add_argument(
         "--poll-interval",

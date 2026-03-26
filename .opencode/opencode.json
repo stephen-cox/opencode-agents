@@ -7,7 +7,10 @@
       "command": ["npx", "backlog", "mcp", "start"]
     }
   },
-  "plugin": ["@thehugeman/opencode-anthropic-auth-community"],
+  "plugin": [
+    "opencode-claude-bridge",
+    "./plugins/opencode-context-cache.mjs"
+  ],
   "provider": {
     "pythagoras": {
       "npm": "@ai-sdk/openai-compatible",
