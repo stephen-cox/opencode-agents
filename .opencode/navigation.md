@@ -20,45 +20,43 @@ controls requirements and approach.
 | `/plan <task>`        | Design solution with atomic task specs                            |
 | `/code <brief>`       | Implement an atomic task from an approved plan                    |
 | `/verify <code>`      | Review changes with 4-layer verification                          |
-| `/commit-epcv {n}`    | Commit task changes with auto-generated message (task # optional) |
+| `/commit-task [n]`    | Commit task changes with auto-generated message (task # optional) |
 
 ## Workflow Sequence
 
 Run these commands in order, reviewing output at each step:
 
 ```text
-/explore → review → /plan → review → /code → /verify → /commit-epcv → task loop → phase loop
+/explore → review → /plan → review → /code → /verify → /commit-task → task loop → phase loop
 ```
 
 ## System Components
 
 ### Agents
 
-| Agent    | File                | Purpose                                                   |
-| -------- | ------------------- | --------------------------------------------------------- |
-| Explorer | `agent/explorer.md` | Codebase investigation (Phase 1)                          |
-| Planner  | `agent/planner.md`  | Solution design, atomic task specs, task briefs (Phase 2) |
-| Coder    | `agent/coder.md`    | Implementation per atomic task (Phase 3)                  |
-| Verifier | `agent/verifier.md` | 4-layer verification per atomic task (Phase 4)            |
+| Agent        | File                     | Purpose                                                   |
+| ------------ | ------------------------ | --------------------------------------------------------- |
+| Explorer     | `agent/explorer.md`      | Codebase investigation (Phase 1)                          |
+| Planner      | `agent/planner.md`       | Solution design, atomic task specs, task briefs (Phase 2) |
+| Coder        | `agent/coder.md`         | Implementation per atomic task (Phase 3)                  |
+| Verifier     | `agent/verifier.md`      | 4-layer verification per atomic task (Phase 4)            |
+| GeneralCoder | `agent/general_coder.md` | Runs all four phases inline in a single conversation      |
+
+Read-only Haiku subagents in `agent/subagent/` (context-scout, dependency-mapper, test-scout) can be delegated to by the GeneralCoder for cheap parallel context gathering.
 
 All agents use OpenCode format (YAML frontmatter with `description` and `mode` fields, plain markdown body).
 
-### Workflows
+### Skills
 
-| Workflow        | File                           | Purpose                                        |
-| --------------- | ------------------------------ | ---------------------------------------------- |
-| EPCV Standard   | `workflows/epcv-standard.md`   | Full iterative workflow with human gates       |
-| Explore Only    | `workflows/explore-only.md`    | Investigation without changes                  |
-| Verify Existing | `workflows/verify-existing.md` | Review existing code with 4-layer verification |
+Agents are thin shims; the workflow rules, output formats, and hard gates live in skills, loaded on demand:
 
-### Context
-
-| Category  | Directory            | Contents                                                                                            |
-| --------- | -------------------- | --------------------------------------------------------------------------------------------------- |
-| Domain    | `context/domain/`    | EPCV methodology (iterative workflow, atomic tasks, human gates), agent roles                       |
-| Processes | `context/processes/` | Workflow process (stages), complexity classification                                                |
-| Standards | `context/standards/` | Quality criteria, validation rules (with human gates), error handling (with bug-fixing loop escape) |
-| Templates | `context/templates/` | Output formats (atomic task spec, 4-layer verification report), common patterns                     |
+| Skill                      | Loaded By                      | Purpose                                                       |
+| -------------------------- | ------------------------------ | ------------------------------------------------------------- |
+| `exploring-ideas`          | Explorer, GeneralCoder         | Phase 1 process, exploration report format                    |
+| `writing-plans`            | Planner, GeneralCoder          | Phase 2 process, atomic task spec, task brief format          |
+| `implementing-tasks`       | Coder, GeneralCoder            | Phase 3 process, implementation report format                 |
+| `verifying-changes`        | Verifier, GeneralCoder         | Phase 4 process, 4-layer verification report, verdict rules   |
+| `tracking-work-in-backlog` | Referenced by each phase skill | Backlog persistence for cross-session/specialised-agent flows |
 
 ### Commands
 
@@ -68,8 +66,8 @@ All agents use OpenCode format (YAML frontmatter with `description` and `mode` f
 | `/explore`     | `command/explore.md`     | explorer |
 | `/plan`        | `command/plan.md`        | planner  |
 | `/code`        | `command/code.md`        | coder    |
-| `/commit-epcv` | `command/commit-epcv.md` | coder    |
 | `/verify`      | `command/verify.md`      | verifier |
+| `/commit-task` | `command/commit-task.md` | coder    |
 
 All commands use OpenCode format (YAML frontmatter with `description`, optional `agent`/`model`, body uses `$ARGUMENTS`).
 
@@ -88,5 +86,3 @@ All commands use OpenCode format (YAML frontmatter with `description`, optional 
 - [Architecture Guide](ARCHITECTURE.md) — System design, workflow, component relationships
 - [Quick Start Guide](QUICK-START.md) — Get started in 5 minutes
 - [Testing Guide](TESTING.md) — Validation checklist (human gates, task loops, 4-layer verification)
-- [Context Guide](context/navigation.md) — Context file organisation
-- [Workflow Guide](workflows/navigation.md) — Workflow selection

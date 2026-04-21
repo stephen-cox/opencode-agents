@@ -33,7 +33,7 @@ Review the plan, then for each task:
 ```text
 /code Implement task 1 from the approved plan
 /verify Check the changes to src/auth/signup.ts
-/commit-epcv 1
+/commit-task 1
 ```
 
 ### Just Explore

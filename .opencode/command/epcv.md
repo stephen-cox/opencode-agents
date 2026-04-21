@@ -18,18 +18,20 @@ Run these commands in order, reviewing output at each step:
 4. **Review** — Read the plan, approve before coding begins
 5. **Code**: `/code <task brief>` — Implement each atomic task
 6. **Verify**: `/verify <what changed>` — Validate with 4-layer checks
-7. **Commit**: `/commit-epcv {n}` — Commit verified changes per task
+7. **Commit**: `/commit-task [n]` — Commit verified changes per task (task number optional if exactly one is In Progress)
 8. **Loop** — Repeat steps 5-7 for remaining tasks, then repeat steps 3-7 for remaining phases
 
 ## Quick Reference
 
-| Command               | Agent    | Purpose                                     |
-| --------------------- | -------- | ------------------------------------------- |
-| `/explore <question>` | Explorer | Investigate codebase without changes        |
-| `/plan <task>`        | Planner  | Design solution with atomic task specs      |
-| `/code <brief>`       | Coder    | Implement an atomic task                    |
-| `/verify <changes>`   | Verifier | 4-layer verification of changes             |
-| `/commit-epcv {n}`    | Coder    | Commit task changes with task-based message |
+| Command              | Agent    | Skill                | Purpose                                            |
+| -------------------- | -------- | -------------------- | -------------------------------------------------- |
+| `/explore <request>` | Explorer | `exploring-ideas`    | Build shared understanding of intent and landscape |
+| `/plan <request>`    | Planner  | `writing-plans`      | Produce atomic, testable implementation plan       |
+| `/code <brief>`      | Coder    | `implementing-tasks` | Implement one atomic task                          |
+| `/verify <changes>`  | Verifier | `verifying-changes`  | 4-layer verification, PASS / FAIL verdict          |
+| `/commit-task {n}`   | Coder    | —                    | Commit verified changes with task-based message    |
+
+Progress persistence (Backlog docs and tasks) is handled by the `tracking-work-in-backlog` skill, which each phase skill references when cross-session tracking is needed.
 
 ## Human Gates
 

@@ -27,7 +27,11 @@ import { appendFileSync, existsSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import { createHash } from "crypto";
 
-const SESSION_ID_HEADER_NAMES = ["x-session-id", "conversation_id", "session_id"];
+const SESSION_ID_HEADER_NAMES = [
+  "x-session-id",
+  "conversation_id",
+  "session_id",
+];
 const PROMPT_CACHE_KEY_ENV_VAR = "OPENCODE_PROMPT_CACHE_KEY";
 const STICKY_SESSION_ID_ENV_VAR = "OPENCODE_STICKY_SESSION_ID";
 const CACHE_DEBUG_ENV_VAR = "OPENCODE_CONTEXT_CACHE_DEBUG";
@@ -217,7 +221,8 @@ class CacheKeyResolver {
 
     // 5) OpenCode session fallback.
     if (!rawKey) {
-      const sessionID = typeof input?.sessionID === "string" ? input.sessionID : "";
+      const sessionID =
+        typeof input?.sessionID === "string" ? input.sessionID : "";
       if (sessionID) {
         rawKey = sessionID;
         source = "opencode sessionID";
@@ -250,7 +255,9 @@ class CacheKeyApplier {
 
   applyPromptCacheKey(output, cacheKey) {
     const existingOutputOptions =
-      output?.options && typeof output.options === "object" ? output.options : {};
+      output?.options && typeof output.options === "object"
+        ? output.options
+        : {};
 
     output.options = {
       ...existingOutputOptions,
@@ -277,7 +284,9 @@ class CacheKeyApplier {
       return;
     }
 
-    this.logger.log("Input model is missing or not an object, cannot set session headers");
+    this.logger.log(
+      "Input model is missing or not an object, cannot set session headers",
+    );
   }
 
   apply(input, output, cacheKey) {

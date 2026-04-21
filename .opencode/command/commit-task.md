@@ -3,7 +3,7 @@ description: Commit task changes with auto-generated message referencing task nu
 agent: coder
 ---
 
-# Commit-EPCV Command
+# Commit task command
 
 Commit all changed files with a message referencing the task number.
 
@@ -29,7 +29,7 @@ Follow these steps:
 Commit with explicit task number:
 
 ```text
-/commit-epcv 2
+/commit-task 2
 ```
 
 This will look up TASK-2 in Backlog.md and generate a commit like:
@@ -38,7 +38,7 @@ This will look up TASK-2 in Backlog.md and generate a commit like:
 Commit with auto-inferred task (when one task is "In Progress"):
 
 ```text
-/commit-epcv
+/commit-task
 ```
 
 The command will find the "In Progress" task and use its number and title.
@@ -47,6 +47,6 @@ The command will find the "In Progress" task and use its number and title.
 
 | Command            | Result                                                         |
 | ------------------ | -------------------------------------------------------------- |
-| `/commit-epcv 2`   | `task-2 Add commit command for task-based commits`             |
-| `/commit-epcv 1.3` | `task-1.3 Add /code command for resuming after plan approval`  |
-| `/commit-epcv`     | Uses the current "In Progress" task, or asks for clarification |
+| `/commit-task 2`   | `task-2 Add commit command for task-based commits`             |
+| `/commit-task 1.3` | `task-1.3 Add /code command for resuming after plan approval`  |
+| `/commit-task`     | Uses the current "In Progress" task, or asks for clarification |

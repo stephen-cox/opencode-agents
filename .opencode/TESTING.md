@@ -78,7 +78,7 @@
 - [ ] Human can review the plan and approve before coding
 - [ ] Human can invoke `/code` per task and receive implementation reports
 - [ ] Human can invoke `/verify` per task and receive verification reports
-- [ ] Human can invoke `/commit-epcv` to commit verified changes
+- [ ] Human can invoke `/commit-task` to commit verified changes
 - [ ] Human can manage the task loop (advance to next task)
 - [ ] Human can manage the phase loop (return to `/plan` for next phase)
 - [ ] Human can handle FAIL verdicts (re-run `/code` with fix instructions, max 2 retries)
@@ -125,7 +125,7 @@
 - [ ] `/plan` produces atomic task specs and delivers plan
 - [ ] `/code` implements a single atomic task and delivers report
 - [ ] `/verify` runs 4-layer verification and delivers report
-- [ ] `/commit-epcv` commits changes with task-based message
+- [ ] `/commit-task` commits changes with task-based message
 - [ ] `/epcv` shows workflow reference
 
 ## Atomic Task Scenarios
@@ -167,4 +167,4 @@
 11. Intentionally create a verification failure to test retry flow
 12. Exhaust retries to test bug-fixing loop escape
 13. Test each slash command independently
-14. Review all output formats match templates in `context/templates/output-formats.md`
+14. Review all output formats match the report templates in the skills (`skills/implementing-tasks/SKILL.md`, `skills/verifying-changes/SKILL.md`)

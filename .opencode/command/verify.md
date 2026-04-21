@@ -1,19 +1,12 @@
 ---
-description: Review existing code for quality and correctness
+description: Phase 4 of EPCV — validate an implementation with four layered checks, produce PASS / PASS_WITH_WARNINGS / FAIL
 agent: verifier
 ---
 
-# Verify Command
+# Verify
 
-Verify the following code or changes:
+Verify these changes:
 
 $ARGUMENTS
 
-Run a full verification using four layered checks:
-
-1. **Automated**: Run tests, linting, type checks, and build validation
-2. **Behavioural**: Check edge cases, failure paths, and user-facing behaviour
-3. **Operational**: Review error handling, logging, configuration, and rollback
-4. **Security**: Check input validation, output encoding, authorisation, secrets management, logging hygiene, and dependency security
-
-Produce a verification report with a clear PASS / FAIL / PASS_WITH_WARNINGS status, including issues found with severity and specific fix instructions for any failures.
+Follow the `verifying-changes` skill. Requires an implementation report from `/code`. On FAIL the report includes fix instructions — hand back to `/code`; on PASS recommend `/commit-task`.

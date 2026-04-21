@@ -60,7 +60,7 @@
                │             │ PASS / FAIL            │
                │             ▼                        │
                │  ┌─────────────────────┐            │
-               │  │  /commit-epcv       │ ← Commit   │
+               │  │  /commit-task       │ ← Commit   │
                │  └──────────┬──────────┘            │
                │             │                        │
                │             ▼ next task or exit      │
@@ -101,7 +101,7 @@ agent. Each command routes to a specialised agent:
 4. Review plan, approve before coding
 5. `/code` → Coder agent (implement atomic task)
 6. `/verify` → Verifier agent (4-layer validation)
-7. `/commit-epcv` → Coder agent (commit verified changes)
+7. `/commit-task` → Coder agent (commit verified changes)
 8. Loop through remaining tasks and phases
 
 ### Context Flow
@@ -120,7 +120,7 @@ relevant context from prior phases when invoking each command:
 
 ```text
 /explore ──gate──▶ Human Approval ──gate──▶ /plan ──gate──▶ Human Approval
-    ──gate──▶ /code ──gate──▶ /verify ──gate──▶ /commit-epcv ──gate──▶ Task Loop
+    ──gate──▶ /code ──gate──▶ /verify ──gate──▶ /commit-task ──gate──▶ Task Loop
 ```
 
 Each gate checks specific criteria before allowing progression.

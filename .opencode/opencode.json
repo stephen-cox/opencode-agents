@@ -7,10 +7,7 @@
       "command": ["npx", "backlog", "mcp", "start"]
     }
   },
-  "plugin": [
-    "opencode-claude-bridge",
-    "./plugins/opencode-context-cache.mjs"
-  ],
+  "plugin": ["opencode-claude-bridge", "./plugins/opencode-context-cache.mjs"],
   "provider": {
     "pythagoras": {
       "npm": "@ai-sdk/openai-compatible",

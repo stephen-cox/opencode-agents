@@ -1,21 +1,12 @@
 ---
-description: Investigate the codebase without making changes
+description: Phase 1 of EPCV — turn a request into a shared understanding of intent, constraints, landscape, and unknowns
 agent: explorer
 ---
 
-# Explore Command
+# Explore
 
-Explore the codebase to answer the following question:
+Explore this request:
 
 $ARGUMENTS
 
-Produce a structured exploration report covering:
-
-- Files found and their roles
-- Existing patterns documented
-- Dependency map
-- Risks and concerns
-- Context summary
-- Open questions
-
-Do not make any changes to the codebase. This is a read-only investigation.
+Follow the `exploring-ideas` skill. Do not plan, do not implement, do not commit.
