@@ -60,6 +60,7 @@ This system was inspired by [OpenAgentsControl](https://github.com/darrenhinde/O
 - [ARCHITECTURE.md](.opencode/ARCHITECTURE.md) - System design and component relationships
 - [QUICK-START.md](.opencode/QUICK-START.md) - Get started in 5 minutes
 - [TESTING.md](.opencode/TESTING.md) - Validation checklist and testing approach
+- [Docker remote coding environment](docker/README.md) - Container and Kubernetes runtime guidance
 
 ## Development
 
