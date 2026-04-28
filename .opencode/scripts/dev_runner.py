@@ -343,16 +343,23 @@ def opencode_health(config: Config) -> bool:
 
 
 def create_session(config: Config, title: str) -> str:
-    """Create a new OpenCode session and return its ID."""
+    """Create a new OpenCode session bound to ``config.project_dir`` and return its ID."""
     r = requests.post(
         f"{config.opencode_url}/session",
+        params={"directory": config.project_dir},
         json={"title": title},
         timeout=15,
     )
     r.raise_for_status()
     session = r.json()
     session_id = session.get("id") or session.get("ID")
-    log.debug(f"  Created session: {session_id} ({title})")
+    bound_dir = session.get("directory")
+    if bound_dir and bound_dir != config.project_dir:
+        log.warning(
+            f"  Session {session_id} bound to {bound_dir!r} "
+            f"but expected {config.project_dir!r}"
+        )
+    log.debug(f"  Created session: {session_id} in {bound_dir} ({title})")
     return session_id
 
 
@@ -729,24 +736,67 @@ def send_message(
         sse.stop()
 
 
-def get_session_diff(config: Config, session_id: str) -> str:
-    """Get the git diff for a session's changes."""
-    r = requests.get(
-        f"{config.opencode_url}/session/{session_id}/diff",
-        timeout=30,
-    )
-    r.raise_for_status()
-    data = r.json()
+def build_change_summary(config: Config) -> tuple[list[str], str]:
+    """Return ``(changed_files, summary_text)`` for the working tree.
 
-    if isinstance(data, list):
-        parts = []
-        for f in data:
-            path = f.get("path") or f.get("file") or "unknown"
-            content = f.get("diff") or f.get("content") or json.dumps(f)
-            parts.append(f"--- {path} ---\n{content}")
-        return "\n\n".join(parts)
+    The summary is a ``git diff --stat``-style listing plus a section
+    naming any new (untracked) files with line counts.  The verifier
+    receives this in its prompt instead of the full diff so the prompt
+    stays small; it then runs ``git diff HEAD -- <path>`` against the
+    project directory itself when it needs to see actual changes.
 
-    return json.dumps(data, indent=2)
+    ``changed_files`` is empty when there is nothing to verify.
+    """
+
+    def _run_git(args: list[str], timeout: int = 15) -> str:
+        r = subprocess.run(
+            ["git", *args],
+            cwd=config.project_dir,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return r.stdout
+
+    try:
+        name_status = _run_git(["diff", "--name-status", "HEAD"])
+        stat = _run_git(["diff", "--stat", "HEAD"], timeout=30)
+        porcelain = _run_git(["status", "--porcelain"])
+    except (subprocess.SubprocessError, OSError) as e:
+        log.warning(f"  Could not run git in {config.project_dir}: {e}")
+        return [], ""
+
+    tracked_files = [
+        line.split("\t", 1)[1]
+        for line in name_status.splitlines()
+        if "\t" in line
+    ]
+    untracked = [
+        line[3:] for line in porcelain.splitlines() if line.startswith("?? ")
+    ]
+    changed = tracked_files + untracked
+
+    if not changed:
+        return [], ""
+
+    parts: list[str] = []
+    if stat.strip():
+        parts.append("Tracked changes (git diff --stat HEAD):")
+        parts.append(stat.rstrip())
+    if untracked:
+        parts.append("\nNew (untracked) files:")
+        for path in untracked:
+            try:
+                line_count = sum(
+                    1 for _ in (Path(config.project_dir) / path).open(
+                        encoding="utf-8", errors="replace"
+                    )
+                )
+                parts.append(f"  {path}  (+{line_count} lines, new file)")
+            except OSError:
+                parts.append(f"  {path}  (new file)")
+
+    return changed, "\n".join(parts)
 
 
 def run_shell(config: Config, session_id: str, command: str) -> dict:
@@ -877,7 +927,7 @@ These were identified as gaps during previous review and are now required:
 def build_verifier_prompt(
     task: Task,
     extra_criteria: list[str],
-    diff_text: str,
+    change_summary: str,
 ) -> str:
     all_criteria = task.acceptance_criteria + extra_criteria
 
@@ -912,14 +962,22 @@ All of these must be true:
 Perform each of these where possible:
 {chr(10).join("- " + c for c in task.manual_checks)}
 
-## Changes Made (diff)
+## Changed Files (summary)
+The full diff is intentionally omitted to keep this prompt small.
+Use your shell tools in the project directory to inspect actual changes:
+- `git diff HEAD -- <path>` for the patch of any modified file
+- `git diff HEAD` for the complete tracked diff if you need it
+- Read the file directly for full file context (preferred — see step 1)
+
 ```
-{diff_text}
+{change_summary}
 ```
 
 ## Verification Process
 Work through this systematically:
-1. READ every changed file in full, not just the diff
+1. For each changed file: run `git diff HEAD -- <path>` to see the change,
+   then READ the file in full so you understand it in context — don't review
+   from the diff alone.
 2. CHECK each acceptance criterion — does the implementation satisfy it?
 3. CHECK each definition of done condition
 4. PERFORM each manual check where possible (run curl, check files, test endpoints)
@@ -1028,35 +1086,73 @@ def parse_verify_result(response_text: str) -> VerifyResult:
 
 
 def git_commit(config: Config, session_id: Optional[str], message: str) -> bool:
-    """Commit all changes. Tries OpenCode API first, falls back to CLI."""
-    safe_msg = message[:120].replace('"', '\\"')
+    """Commit all changes in ``config.project_dir`` via local git subprocess.
 
-    # Try via OpenCode shell API
-    if session_id:
-        try:
-            run_shell(config, session_id, f'git add -A && git commit -m "{safe_msg}"')
-            return True
-        except Exception as e:
-            log.debug(f"  OpenCode shell commit failed: {e}, trying CLI")
+    The OpenCode ``/session/:id/shell`` endpoint is intentionally NOT used:
+    it returns HTTP 200 with ``status: completed`` regardless of the
+    underlying command's exit code and exposes no exit-code field, so a
+    silently-failing ``git commit`` would be reported as success.  The
+    runner already operates on ``config.project_dir`` for diff/revert, so
+    the local subprocess path is the authoritative one.
 
-    # Fallback to direct CLI
+    ``session_id`` is accepted for backward compatibility but unused.
+    """
+    del session_id  # unused — see docstring
+
+    head_before = _git_head(config)
+
     try:
         subprocess.run(
             ["git", "add", "-A"],
             cwd=config.project_dir,
             check=True,
+            capture_output=True,
+            text=True,
             timeout=15,
         )
         subprocess.run(
             ["git", "commit", "-m", message[:120]],
             cwd=config.project_dir,
             check=True,
+            capture_output=True,
+            text=True,
             timeout=15,
         )
-        return True
     except subprocess.CalledProcessError as e:
-        log.error(f"  Git commit failed: {e}")
+        stderr = (e.stderr or "").strip()
+        stdout = (e.stdout or "").strip()
+        log.error(
+            f"  Git commit failed (exit {e.returncode}): "
+            f"{stderr or stdout or e}"
+        )
         return False
+
+    head_after = _git_head(config)
+    if head_before and head_after and head_before == head_after:
+        log.error(
+            f"  Git commit reported success but HEAD did not advance "
+            f"({head_after}) — nothing was committed"
+        )
+        return False
+
+    return True
+
+
+def _git_head(config: Config) -> Optional[str]:
+    """Return the current HEAD SHA, or None if it cannot be read."""
+    try:
+        r = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=config.project_dir,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if r.returncode == 0:
+            return r.stdout.strip() or None
+    except (subprocess.SubprocessError, OSError):
+        pass
+    return None
 
 
 def git_revert(config: Config):
@@ -1137,30 +1233,29 @@ def run_task(config: Config, task: Task) -> TaskResult:
             continue
         log.info(f"  [Coder] Done in {time.time() - t0:.0f}s")
 
-        # ---- GET DIFF ----
-        log.info("  [Verifier] Getting diff...")
-        try:
-            diff_text = get_session_diff(config, coder_session_id)
-        except Exception as e:
-            log.warning(f"  Could not get diff from API: {e}, using git diff")
-            result = subprocess.run(
-                ["git", "diff"],
-                cwd=config.project_dir,
-                capture_output=True,
-                text=True,
-            )
-            diff_text = result.stdout
+        # ---- SUMMARISE CHANGES ----
+        log.info(f"  [Verifier] Summarising changes in {config.project_dir}...")
+        changed_files, change_summary = build_change_summary(config)
 
-        if not diff_text or diff_text.strip() in ("[]", "{}"):
-            log.warning("  [Verifier] No changes detected — coder produced no diff")
-            feedback = "No code changes were made. The task has not been implemented."
+        if not changed_files:
+            log.warning(
+                "  [Verifier] No changes detected — coder produced no diff"
+            )
+            feedback = (
+                "No code changes were made. The task has not been implemented."
+            )
             continue
+
+        log.info(
+            f"  [Verifier] {len(changed_files)} file(s) changed; "
+            f"summary {len(change_summary)} chars"
+        )
 
         # ---- VERIFY ----
         log.info("  [Verifier] Creating session...")
         verifier_session_id = create_session(config, f"Verifier: {task.slug}")
 
-        v_prompt = build_verifier_prompt(task, new_criteria, diff_text)
+        v_prompt = build_verifier_prompt(task, new_criteria, change_summary)
         log.info("  [Verifier] Sending prompt, waiting for review...")
         t0 = time.time()
         try:

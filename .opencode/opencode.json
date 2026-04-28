@@ -4,10 +4,10 @@
   "mcp": {
     "backlog": {
       "type": "local",
-      "command": ["npx", "backlog", "mcp", "start"]
+      "command": ["backlog", "mcp", "start"]
     }
   },
-  "plugin": ["opencode-claude-bridge", "./plugins/opencode-context-cache.mjs"],
+  "plugin": ["./plugins/opencode-context-cache.mjs"],
   "provider": {
     "pythagoras": {
       "npm": "@ai-sdk/openai-compatible",
@@ -16,11 +16,11 @@
         "baseURL": "http:/192.168.0.11:11434/v1"
       },
       "models": {
-        "devstral-small-2": {
-          "name": "Devstral Small 2"
+        "gemma4:26b": {
+          "name": "Gemma 4"
         },
-        "gpt-oss:20b": {
-          "name": "GPT OSS 20b"
+        "qwen3.6:35b-a3b": {
+          "name": "Qwen 3.6"
         }
       }
     }
