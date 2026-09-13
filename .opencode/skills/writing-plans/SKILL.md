@@ -17,20 +17,25 @@ Exploration tells you what exists; it does not tell you what to change. Skipping
 
 A task that touches many files, blends concerns, or cannot be reverted on its own is not a task — it is a phase. Split it. The review cost of a giant task always exceeds the split cost.
 
+## Anti-Pattern: "Plan for Everything"
+
+Accommodating every potential issue up front is scope creep committed at design time. Robustness against a problem you do not yet have is not rigour — it is cost: more tasks to review, more code to maintain, more ways to be wrong. If a concern does not block the current milestone's deliverable, put it in the "Noted, not planned" list and carry it forward. The plan defends the deliverable, not the future. K.I.S.S.
+
 ## Checklist
 
 Create a task for each item and complete in order:
 
 1. **Confirm inputs** — approved exploration document, complexity classification, any constraints named by the user
-2. **Design the solution** — pick an approach that fits existing patterns, justify it against at least one alternative
-3. **Define the do-not-touch list** — files, areas, dependency rules the plan will not cross
-4. **Break into phases** — only if multi-phase; each phase is a coherent, shippable slice
-5. **Specify atomic tasks** — scope, acceptance criteria, definition of done, tests, rollback, risk
-6. **Write task briefs** — self-contained work orders a stranger could execute
-7. **Sequence within phase** — dependencies first, no broken intermediate states
-8. **Present the plan** — in sections, scaled to complexity, pause for feedback after each
-9. **Persist the plan** — if cross-session tracking is needed, follow the `tracking-work-in-backlog` skill (Planning section); skip for inline single-agent workflows
-10. **Hand off to Coding** — only after persistence (or explicit skip)
+2. **Design the solution** — pick the simplest approach that fits existing patterns, justify it against at least one alternative
+3. **Triage risks and concerns** — plan only what blocks the current milestone's deliverable; everything else goes to the "Noted, not planned" list
+4. **Define the do-not-touch list** — files, areas, dependency rules the plan will not cross
+5. **Break into phases** — only if multi-phase; each phase is a milestone with one concrete deliverable
+6. **Specify atomic tasks** — scope, acceptance criteria, definition of done, tests, rollback, risk
+7. **Write task briefs** — self-contained work orders a stranger could execute
+8. **Sequence within phase** — dependencies first, no broken intermediate states
+9. **Present the plan** — in sections, scaled to complexity, pause for feedback after each
+10. **Persist the plan** — if cross-session tracking is needed, follow the `tracking-work-in-backlog` skill (Planning section); skip for inline single-agent workflows
+11. **Hand off to Coding** — only after persistence (or explicit skip)
 
 **The terminal state is handing off to Coding** (the `coder` agent or `/code` command). Do not invoke `coder`, `verifier`, or implementation skills from here.
 
@@ -42,7 +47,13 @@ Before planning, confirm: the approved exploration document exists, the complexi
 
 ### Designing the solution
 
-Pick the approach that fits the existing patterns, not the approach that would be ideal in a greenfield codebase. Name at least one alternative and say why you rejected it — this is the cheapest defence against sunk-cost bias later. Address each risk the Explorer flagged; if you cannot, surface it as an unknown and stop.
+Pick the approach that fits the existing patterns, not the approach that would be ideal in a greenfield codebase. Prefer the simplest design that meets today's requirement — complexity must be justified by a present need, not a possible future one. Name at least one alternative and say why you rejected it — this is the cheapest defence against sunk-cost bias later.
+
+Triage the risks the Explorer flagged rather than accommodating them all: a risk that blocks the current milestone's deliverable is addressed in the plan; everything else is carried forward in "Noted, not planned". If a blocking risk cannot be addressed, surface it as an unknown and stop.
+
+### Noted, not planned
+
+The plan needs a home for everything you saw and chose not to do — the carry-forward list. One line per item: edge cases that do not block the deliverable, robustness ideas, refactor opportunities, risks triaged as non-blocking. No task specs, no design work, no acceptance criteria — that would be planning it. Items here are reconsidered at the next phase boundary (or persisted via the `tracking-work-in-backlog` skill when tracking), never silently dropped. Deferring to this list is success, not failure: it is how the plan stays small without losing what you learned.
 
 ### The do-not-touch list
 
@@ -50,7 +61,9 @@ Before writing tasks, name what the plan _will not_ touch: files, modules, confi
 
 ### Breaking into phases
 
-Use phases only when the work genuinely is multi-stage. Each phase must be a coherent slice that could ship on its own and leave the system in a valid state. Order by dependency, then by risk (lower risk first — you want to learn cheaply). Detail the next phase fully; later phases can stay coarse and be refined when reached.
+Use phases only when the work genuinely is multi-stage. Each phase is a milestone with one concrete deliverable — the thing a user or reviewer can run, see, or test when it lands. If you cannot state the deliverable in one sentence, the phase is too big; split it. Prefer more, smaller phases over one comprehensive phase, and make the first phase the smallest change that produces something demonstrable.
+
+Each phase must be a coherent slice that could ship on its own and leave the system in a valid state. Order by dependency, then by risk (lower risk first — you want to learn cheaply). Detail the next phase fully; later phases can stay coarse and be refined when reached.
 
 ### Specifying atomic tasks
 
@@ -97,15 +110,18 @@ Scale each section to complexity. Present in sections and pause for feedback:
 - **Solution design** — approach, rationale, alternatives considered
 - **Architecture decisions** — one row per non-trivial choice
 - **Do-not-touch list** — files, areas, dependency rules
-- **Phase breakdown** — scope per phase, task counts
+- **Phase breakdown** — deliverable and scope per phase, task counts
 - **Task specifications** — the seven fields for each task in the current phase
 - **Task briefs** — per-task work orders for the Coder
+- **Noted, not planned** — carried-forward items, one line each
 
 ## Planning Depth by Complexity
 
 - **Simple** — 1 phase, 1–2 tasks. Brief design. Acceptance criteria and DoD per task. Implicit rollback (git revert). Concise briefs.
 - **Moderate** — 1–2 phases, multiple tasks. Full design with rationale. All seven fields per task. Explicit do-not-touch list. Explicit rollback per task.
 - **Complex** — multiple phases. Comprehensive design with alternatives analysis. ADRs for non-trivial decisions. Strict do-not-touch and dependency guardrails. Migration/data rollback spelled out. Current phase fully detailed; later phases coarse.
+
+When torn between two complexity classes, pick the lower: under-planning is caught cheaply at the human gate; over-planning wastes it and buries the reviewer.
 
 ## After Approval
 
@@ -115,6 +131,7 @@ Scale each section to complexity. Present in sections and pause for feedback:
 ## Key Principles
 
 - **Minimal changes** — the best plan makes the fewest changes that meet the requirements
+- **KISS — note it, don't plan it** — the simplest design that meets today's requirement wins; non-blocking concerns go to "Noted, not planned", not into the plan
 - **Follow existing patterns** — consistency beats theoretical best practice
 - **No broken intermediate states** — every committed step must leave the tree valid
 - **Explicit over implicit** — spell out what to do; the Coder should not design

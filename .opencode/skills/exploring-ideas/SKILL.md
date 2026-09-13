@@ -76,6 +76,8 @@ An unknown is anything a reasonable Planner would have to guess. Unknowns are _m
 
 For each risk, name: what could break, how likely, how bad, who would notice. Favour concrete ("changing this signature breaks three call sites in `billing/`") over generic ("refactors are risky"). Flag anything security-sensitive, performance-sensitive, or observable to end users.
 
+Tag each risk **blocking** (ignoring it would invalidate the first deliverable) or **carry-forward** (real, but survivable until a later milestone). The Planner addresses blocking risks in the plan and defers the rest as carried-forward notes — an untagged pile of risks invites over-planning.
+
 ## Presenting Findings
 
 Scale each section to its complexity — a sentence or two when the request is simple, up to a few paragraphs when it is not. Present in sections and pause for feedback after each:
@@ -84,7 +86,7 @@ Scale each section to its complexity — a sentence or two when the request is s
 - **Intent** — what the user is actually trying to achieve
 - **Constraints** — deadlines, stakeholders, immovable systems, prior decisions
 - **Landscape** — relevant files / docs / systems, existing patterns, dependency map
-- **Risks** — what could go wrong, severity, who would notice
+- **Risks** — what could go wrong, severity, who would notice, each tagged blocking or carry-forward
 - **Unknowns** — open questions requiring user input
 - **Summary** — one tight paragraph the Planner can read cold
 

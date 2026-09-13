@@ -42,7 +42,8 @@ Run after presenting the plan and getting user approval.
    - **References**: the exploration document ID
 4. **Create milestones for phases** (if multi-phase) — `milestone_add` per phase, then attach to each task via `task_edit`.
 5. **Attach the plan** — `task_edit` with `planSet` on each task to record the full task brief (scope, constraints, files, assumptions, patterns).
-6. **Report task IDs** — include them in the hand-off so Coder and Verifier can cite them.
+6. **Persist carried-forward items** — record the plan's "Noted, not planned" list so it survives the session: a draft task per item (title only, no plan, no acceptance criteria), or the list appended to the parent task's description. Do not spec these out — they are notes, not work orders; they get reconsidered at the next phase boundary.
+7. **Report task IDs** — include them in the hand-off so Coder and Verifier can cite them.
 
 ## Phase: Coding
 
