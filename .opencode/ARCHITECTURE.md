@@ -214,13 +214,3 @@ Not every task needs the same rigour:
 - A new auth system shouldn't get a quick plan
 
 Classification ensures appropriate effort for each task.
-
-## Performance Characteristics
-
-| Metric              | Expected                                       |
-| ------------------- | ---------------------------------------------- |
-| Context efficiency  | High — each agent gets only relevant context   |
-| First-pass success  | ~80% — exploration prevents blind errors       |
-| Retry success rate  | ~95% — specific fix instructions from Verifier |
-| Human gate overhead | Minimal — concise summaries for simple tasks   |
-| Iterative scaling   | Linear — task/phase loops handle any size      |
