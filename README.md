@@ -50,6 +50,30 @@ flowchart TB
 - **Four-layer verification**: Automated, behavioural, operational, and security checks
 - **Bug-fixing loop escape**: Prevents wasted effort on repeated patch attempts
 
+## Installation
+
+Use `install.sh` to copy the agents, commands, skills, and plugins into place
+for OpenCode — either globally (all projects) or into a single project:
+
+```bash
+# Available in every project (~/.config/opencode)
+./install.sh --global
+
+# A single project
+./install.sh --project /path/to/your/project
+```
+
+To update an existing install, `git pull` this repo and re-run the same
+command — every item this repo provides is replaced with the current version,
+while your own agents, commands, and skills in the same directories are left
+alone. Alternatively, pass `--symlink` to link items into place instead of
+copying, so a `git pull` updates every install automatically.
+
+Repo-specific configuration (`opencode.json`, `tui.json`) is never installed.
+For cross-session task tracking, configure the
+[Backlog.md](https://github.com/MrLesk/Backlog.md) MCP server in the target
+project — without it the skills still work, skipping persistence.
+
 ## Inspiration
 
 This system was inspired by [OpenAgentsControl](https://github.com/darrenhinde/OpenAgentsControl) and builds upon its principles of structured AI-assisted development.
