@@ -82,11 +82,15 @@
 /verify FAIL → /code (fix instructions, retry 1) → /verify
                                                       │
                                          FAIL → /code (retry 2) → /verify
-                                                                     │
-                                                        FAIL → Bug-fixing loop escape
-                                                               (/explore for new evidence)
-                                                               → Escalate if still fails
+                                                                      │
+                                                         FAIL → Bug-fixing loop escape
+                                                                (/explore for new evidence)
+                                                                → Escalate if still fails
 ```
+
+Ralph runs this same loop autonomously for pre-approved batches with one documented
+deviation: 3 fix rounds instead of 2. The fourth FAIL stashes the task's changes and
+skips to the next task; the failure details land in the batch report for the human.
 
 ## Component Relationships
 
@@ -104,17 +108,30 @@ agent. Each command routes to a specialised agent:
 7. `/commit-task` → Coder agent (commit verified changes)
 8. Loop through remaining tasks and phases
 
+### The Opt-In Orchestrator Exception (Ralph)
+
+The standard flow has no orchestrator — but for batches of already-approved tasks,
+the opt-in `/ralph` batch runner (`agents/ralph.md` + the `ralph-batch-runner` skill)
+automates only the gate-free Task Loop: build → verify → fix (≤ 3 rounds) → commit,
+per task. Both human gates still happen — before `/ralph` is invoked. A task that
+still FAILs after 3 fix rounds is stashed (`git stash`) and skipped, keeping every
+task's commit atomic, and the batch ends with a report for the human. Ralph never
+edits code itself; it dispatches the `subagent/coder-worker` and
+`subagent/verifier-worker` subagents and owns only orchestration, commits, and
+reporting.
+
 ### Context Flow
 
 Each agent receives context through the conversation. The human provides
 relevant context from prior phases when invoking each command:
 
-| Agent    | Needs From Prior Phases                                  |
-| -------- | -------------------------------------------------------- |
-| Explorer | User request, complexity assessment                      |
-| Planner  | User request, exploration report, approved direction     |
-| Coder    | Task spec, task brief, do-not-touch list, patterns       |
-| Verifier | Task spec (acceptance criteria, DoD, risk), changes made |
+| Agent    | Needs From Prior Phases                                   |
+| -------- | --------------------------------------------------------- |
+| Explorer | User request, complexity assessment                       |
+| Planner  | User request, exploration report, approved direction      |
+| Coder    | Task spec, task brief, do-not-touch list, patterns        |
+| Verifier | Task spec (acceptance criteria, DoD, risk), changes made  |
+| Ralph    | Approved task batch (post-Gate #2), task specs and briefs |
 
 ### Quality Gates
 
