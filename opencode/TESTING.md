@@ -67,6 +67,17 @@
 - [ ] Provides specific, actionable fix instructions on FAIL
 - [ ] Uses only bash + read tools (no write/edit)
 
+### Ralph (Batch Runner)
+
+- [ ] Refuses to start on a dirty git tree (clean-tree precondition)
+- [ ] Happy path: build → verify PASS → commits with `task-{n} {description}` message
+- [ ] Fix-round path: FAIL → fix instructions passed verbatim → re-verify (max 3 fix rounds)
+- [ ] Exhaustion path: fourth FAIL → `git stash` → skip → next task starts on a clean tree
+- [ ] PASS_WITH_WARNINGS commits (FAIL never does)
+- [ ] Never pushes; delivery ends at local commits
+- [ ] Final batch report includes verdicts, attempts, commit hashes, stash refs, and failure details
+- [ ] Workers return reports in the `implementing-tasks` / `verifying-changes` formats
+
 ## Human Workflow Testing
 
 ### Workflow Coordination
