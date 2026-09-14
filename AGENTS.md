@@ -22,7 +22,7 @@ Authoritative workflow rules — process steps, output formats, hard gates, anti
 - `verifying-changes` (Phase 4)
 - `tracking-work-in-backlog` (cross-session persistence)
 
-Agent files in `.opencode/agent/` configure tool access and hand off to the matching skill. Commands in `.opencode/command/` are thin wrappers over the agents (`/explore`, `/plan`, `/code`, `/verify`, `/epcv`, `/commit-task`). For single-conversation use, the `GeneralCoder` agent runs all four phases inline.
+Agent files in `opencode/agents/` configure tool access and hand off to the matching skill. Commands in `opencode/commands/` are thin wrappers over the agents (`/explore`, `/plan`, `/code`, `/verify`, `/epcv`, `/commit-task`). For single-conversation use, the `GeneralCoder` agent runs all four phases inline.
 
 ## Build/Lint/Test Commands
 

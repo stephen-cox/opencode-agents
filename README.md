@@ -69,8 +69,8 @@ while your own agents, commands, and skills in the same directories are left
 alone. Alternatively, pass `--symlink` to link items into place instead of
 copying, so a `git pull` updates every install automatically.
 
-Repo-specific configuration (`opencode.json`, `tui.json`) is never installed.
-For cross-session task tracking, configure the
+Machine-local configuration (`opencode.json`, `tui.json`) is not part of this
+repo. For cross-session task tracking, configure the
 [Backlog.md](https://github.com/MrLesk/Backlog.md) MCP server in the target
 project — without it the skills still work, skipping persistence.
 
@@ -81,10 +81,9 @@ This system was inspired by [OpenAgentsControl](https://github.com/darrenhinde/O
 ## Documentation
 
 - [AGENTS.md](AGENTS.md) - Comprehensive guidelines for agentic coding agents
-- [ARCHITECTURE.md](.opencode/ARCHITECTURE.md) - System design and component relationships
-- [QUICK-START.md](.opencode/QUICK-START.md) - Get started in 5 minutes
-- [TESTING.md](.opencode/TESTING.md) - Validation checklist and testing approach
-- [Docker remote coding environment](docker/README.md) - Container and Kubernetes runtime guidance
+- [ARCHITECTURE.md](opencode/ARCHITECTURE.md) - System design and component relationships
+- [QUICK-START.md](opencode/QUICK-START.md) - Get started in 5 minutes
+- [TESTING.md](opencode/TESTING.md) - Validation checklist and testing approach
 
 ## Development
 

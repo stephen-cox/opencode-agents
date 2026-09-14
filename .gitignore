@@ -6,3 +6,9 @@ node_modules/
 __pycache__
 *.pyc
 .ruff_cache
+
+# Local OpenCode runtime dir (e.g. `./install.sh --project . --symlink` dogfooding)
+.opencode/
+
+# Local Backlog.md data
+backlog/

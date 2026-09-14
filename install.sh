@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Install (or update) the EPCV agents, commands, skills, and plugins for OpenCode.
 #
-# Copies the portable parts of this repo's .opencode/ directory into either
+# Copies the generic parts of this repo's opencode/ directory into either
 # the global OpenCode config directory or a project's .opencode/ directory.
 # Re-running the script updates a previous install: every item this repo
 # provides is replaced with the current version; anything else in the
 # destination (your own agents, commands, skills) is left alone.
 #
-# Repo-specific files (opencode.json, tui.json, docs) are never installed —
-# opencode.json contains machine-local provider and MCP configuration.
+# Machine-local configuration (opencode.json, tui.json) is not part of this
+# repo and is never installed.
 set -euo pipefail
 
 usage() {
@@ -28,11 +28,11 @@ Options:
   -h, --help        Show this help
 
 What gets installed:
-  agent/    -> agents/     EPCV agents (explorer, planner, coder, verifier,
-                           GeneralCoder) and their subagents
-  command/  -> commands/   /explore, /plan, /code, /verify, /epcv, /commit-task
-  skills/   -> skills/     the workflow rules each agent loads
-  plugins/  -> plugins/    the context-cache plugin
+  agents/     EPCV agents (explorer, planner, coder, verifier,
+              GeneralCoder) and their subagents
+  commands/   /explore, /plan, /code, /verify, /epcv, /commit-task
+  skills/     the workflow rules each agent loads
+  plugins/    the context-cache plugin
 
 Re-run the same command at any time to update an existing install.
 EOF
@@ -80,9 +80,9 @@ done
   fail "specify --global or --project <path>"
 }
 
-# Resolve the repo's .opencode directory relative to this script.
+# Resolve the repo's opencode directory relative to this script.
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-source_dir="$script_dir/.opencode"
+source_dir="$script_dir/opencode"
 [ -d "$source_dir" ] || fail "source directory not found: $source_dir"
 
 if [ "$target" = "global" ]; then
@@ -92,16 +92,14 @@ else
   dest_root="$(cd "$project_path" && pwd)/.opencode"
 fi
 
-# Map repo directories (singular) to the destination names the current
-# OpenCode docs use (plural). Each entry is "<source subdir>:<dest subdir>".
-mappings="agent:agents command:commands skills:skills plugins:plugins"
+# Subdirectories of the repo's opencode/ directory that get installed.
+# Source and destination names match the current OpenCode docs (plural).
+subdirs="agents commands skills plugins"
 
 installed=0
-for mapping in $mappings; do
-  src_name="${mapping%%:*}"
-  dest_name="${mapping##*:}"
-  src="$source_dir/$src_name"
-  dest="$dest_root/$dest_name"
+for name in $subdirs; do
+  src="$source_dir/$name"
+  dest="$dest_root/$name"
   [ -d "$src" ] || continue
   mkdir -p "$dest"
 
@@ -115,7 +113,7 @@ for mapping in $mappings; do
       cp -R "$item" "$dest/$base"
     fi
     installed=$((installed + 1))
-    echo "  $dest_name/$base"
+    echo "  $name/$base"
   done
 done
 
