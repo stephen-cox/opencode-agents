@@ -8,8 +8,9 @@ validation follows implementation, and a human remains in the loop at every deci
 
 Work is broken into **phases** and **atomic tasks**. Each task is coded, verified, and
 committed individually. The human drives the workflow by invoking commands directly —
-there is no orchestrator agent. Two mandatory human approval gates ensure the developer
-controls requirements and approach.
+there is no orchestrator agent for the standard flow (the opt-in `/ralph` batch runner
+automates the gate-free task loop for pre-approved task batches). Two mandatory human
+approval gates ensure the developer controls requirements and approach.
 
 ## Quick Start
 
@@ -21,6 +22,7 @@ controls requirements and approach.
 | `/code <brief>`       | Implement an atomic task from an approved plan                    |
 | `/verify <code>`      | Review changes with 4-layer verification                          |
 | `/commit-task [n]`    | Commit task changes with auto-generated message (task # optional) |
+| `/ralph <batch>`      | Batch-run pre-approved tasks: code → verify → fix ≤ 3 → commit    |
 
 ## Workflow Sequence
 
@@ -41,8 +43,9 @@ Run these commands in order, reviewing output at each step:
 | Coder        | `agent/coder.md`         | Implementation per atomic task (Phase 3)                  |
 | Verifier     | `agent/verifier.md`      | 4-layer verification per atomic task (Phase 4)            |
 | GeneralCoder | `agent/general_coder.md` | Runs all four phases inline in a single conversation      |
+| Ralph        | `agent/ralph.md`         | Opt-in batch runner for pre-approved task batches         |
 
-Read-only Haiku subagents in `agent/subagent/` (context-scout, dependency-mapper, test-scout) can be delegated to by the GeneralCoder for cheap parallel context gathering.
+Read-only Haiku subagents in `agent/subagent/` (context-scout, dependency-mapper, test-scout) can be delegated to by the GeneralCoder for cheap parallel context gathering. The `coder-worker` and `verifier-worker` subagents (write-capable and verification-only respectively) are dispatched by Ralph for batch execution.
 
 All agents use OpenCode format (YAML frontmatter with `description` and `mode` fields, plain markdown body).
 
@@ -56,6 +59,7 @@ Agents are thin shims; the workflow rules, output formats, and hard gates live i
 | `writing-plans`            | Planner, GeneralCoder          | Phase 2 process, atomic task spec, task brief format          |
 | `implementing-tasks`       | Coder, GeneralCoder            | Phase 3 process, implementation report format                 |
 | `verifying-changes`        | Verifier, GeneralCoder         | Phase 4 process, 4-layer verification report, verdict rules   |
+| `ralph-batch-runner`       | Ralph                          | Opt-in batch execution of pre-approved tasks                  |
 | `tracking-work-in-backlog` | Referenced by each phase skill | Backlog persistence for cross-session/specialised-agent flows |
 
 ### Commands
@@ -68,6 +72,7 @@ Agents are thin shims; the workflow rules, output formats, and hard gates live i
 | `/code`        | `command/code.md`        | coder    |
 | `/verify`      | `command/verify.md`      | verifier |
 | `/commit-task` | `command/commit-task.md` | coder    |
+| `/ralph`       | `command/ralph.md`       | ralph    |
 
 All commands use OpenCode format (YAML frontmatter with `description`, optional `agent`/`model`, body uses `$ARGUMENTS`).
 

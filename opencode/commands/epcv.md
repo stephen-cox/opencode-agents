@@ -30,6 +30,7 @@ Run these commands in order, reviewing output at each step:
 | `/code <brief>`      | Coder    | `implementing-tasks` | Implement one atomic task                          |
 | `/verify <changes>`  | Verifier | `verifying-changes`  | 4-layer verification, PASS / FAIL verdict          |
 | `/commit-task {n}`   | Coder    | —                    | Commit verified changes with task-based message    |
+| `/ralph <batch>`     | Ralph    | `ralph-batch-runner` | Batch-run pre-approved tasks (fix ≤ 3, then skip)  |
 
 Progress persistence (Backlog docs and tasks) is handled by the `tracking-work-in-backlog` skill, which each phase skill references when cross-session tracking is needed.
 

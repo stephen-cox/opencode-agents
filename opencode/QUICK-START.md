@@ -66,6 +66,19 @@ Review the plan. Once you approve:
 
 Execute each task individually, verifying and committing after each one.
 
+### Batch Mode (Ralph)
+
+For a batch of tasks that has already been planned and approved at Gate #2:
+
+```text
+/ralph Implement tasks 1-4 from the approved plan
+```
+
+Ralph runs each task through code → verify → fix (up to 3 rounds) → commit without
+further interaction. A task that still fails after 3 fix rounds is stashed and
+skipped, and you receive a batch report with commits, stash refs, and failure
+details. Both approval gates still happen — before you invoke `/ralph`.
+
 ### Just Verify
 
 ```text
