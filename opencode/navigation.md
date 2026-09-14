@@ -45,7 +45,7 @@ Run these commands in order, reviewing output at each step:
 | GeneralCoder | `agent/general_coder.md` | Runs all four phases inline in a single conversation      |
 | Ralph        | `agent/ralph.md`         | Opt-in batch runner for pre-approved task batches         |
 
-Read-only Haiku subagents in `agent/subagent/` (context-scout, dependency-mapper, test-scout) can be delegated to by the GeneralCoder for cheap parallel context gathering. The `coder-worker` and `verifier-worker` subagents (write-capable and verification-only respectively) are dispatched by Ralph for batch execution.
+Read-only scout subagents in `agent/subagent/` (context-scout, dependency-mapper, test-scout) can be delegated to by the GeneralCoder for cheap parallel context gathering. They use the primary agent's model by default; to pin a cheaper model for all three, set `EPCV_SCOUT_MODEL` in your environment and copy `opencode/opencode.example.json` to your `opencode.json` (see the README section "Scout subagent models"). The `coder-worker` and `verifier-worker` subagents (write-capable and verification-only respectively) are dispatched by Ralph for batch execution.
 
 All agents use OpenCode format (YAML frontmatter with `description` and `mode` fields, plain markdown body).
 

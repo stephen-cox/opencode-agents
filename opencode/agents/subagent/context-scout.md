@@ -1,7 +1,6 @@
 ---
 description: Fast read-only context discovery for EPCV tasks
 mode: subagent
-model: anthropic/claude-haiku-4-5
 temperature: 0.1
 steps: 6
 hidden: true

@@ -1,7 +1,6 @@
 ---
 description: Read-only test impact discovery for planned code changes
 mode: subagent
-model: anthropic/claude-haiku-4-5
 temperature: 0.1
 steps: 6
 hidden: true

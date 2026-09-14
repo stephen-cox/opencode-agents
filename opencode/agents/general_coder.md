@@ -57,7 +57,7 @@ When a skill says "follow the `tracking-work-in-backlog` skill", skip it. "Prior
 
 ## Subagent Delegation (Cost Efficiency)
 
-Before launching each skill, consider delegating read-only work to cheaper Haiku subagents. Launch via the **Task tool**, in parallel when independent.
+Before launching each skill, consider delegating read-only work to the read-only scout subagents. Launch via the **Task tool**, in parallel when independent.
 
 | Subagent                     | When to use                                                         | Phase                                                            |
 | ---------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |

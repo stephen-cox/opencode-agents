@@ -74,6 +74,29 @@ repo. For cross-session task tracking, configure the
 [Backlog.md](https://github.com/MrLesk/Backlog.md) MCP server in the target
 project — without it the skills still work, skipping persistence.
 
+### Scout subagent models
+
+The read-only scout subagents (`context-scout`, `dependency-mapper`,
+`test-scout`) do not pin a model. By default they inherit the model of the
+primary agent that invokes them. To run them on a cheaper model — recommended,
+since scouting is lightweight — set `EPCV_SCOUT_MODEL` in your environment and
+copy the example config into your project:
+
+```bash
+cp opencode/opencode.example.json /path/to/your/project/opencode.json
+export EPCV_SCOUT_MODEL=anthropic/claude-haiku-4-5
+```
+
+Notes:
+
+- Any `provider/model-id` pair works, e.g. `openai/gpt-5-mini` — run
+  `opencode models` to list what is available to you.
+- If `EPCV_SCOUT_MODEL` is unset, the scouts fall back to model inheritance —
+  nothing errors.
+- OpenCode does not load `.env` files automatically; export the variable in
+  your shell profile or use [direnv](https://direnv.net/) for per-project
+  values.
+
 ## Inspiration
 
 This system was inspired by [OpenAgentsControl](https://github.com/darrenhinde/OpenAgentsControl) and builds upon its principles of structured AI-assisted development.

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "subagent/context-scout": {
+      "model": "{env:EPCV_SCOUT_MODEL}"
+    },
+    "subagent/dependency-mapper": {
+      "model": "{env:EPCV_SCOUT_MODEL}"
+    },
+    "subagent/test-scout": {
+      "model": "{env:EPCV_SCOUT_MODEL}"
+    }
+  }
+}
